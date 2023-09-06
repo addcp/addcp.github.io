@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Index</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="module-Processo%2520100%2520-%2520Inicializa%25C3%25A7%25C3%25A3o.html">Processo 100 - Inicialização</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-8">
+	
+		<div id="main">
+			
+
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+	
+	
+
+
+
+
+
+    <section class="readme-section">
+        <article><p><img src="https://addvisor.com.br/wp-content/uploads/2022/05/Logotipo-addvisor.png" alt="Alt Addson"></p>
+<h1>Plano de Testes</h1>
+<p>Addson / Addtax Cloud - Versão 1.1<br>
+Esta documentação descreve a aplicação de processos de qualidade de software</p>
+<h2>Histórico de Revisões</h2>
+<table>
+<thead>
+<tr>
+<th><strong>Data</strong></th>
+<th><strong>Versão</strong></th>
+<th><strong>Descrição</strong></th>
+<th><strong>Autor</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>24/07/2023</td>
+<td>1.0</td>
+<td>Versão Inicial</td>
+<td>RCruz</td>
+</tr>
+<tr>
+<td>05/09/2023</td>
+<td>1.1</td>
+<td>Inclusão de Prettier e  ESLint</td>
+<td>RCruz</td>
+</tr>
+</tbody>
+</table>
+
+<h1>Introdução</h1>
+<h2>Objetivos</h2>
+<p>Esse documento do Plano de Testes do sistema Addson compõe-se dos seguintes objetivos:</p>
+<p>• Identificar informações de projeto existentes e os componentes de
+software que devem ser testados.</p>
+<p>• Listar os itens de teste recomendados.</p>
+<p>• Recomendar e descrever as estratégias de teste a serem empregadas.</p>
+<p>• Identificar os recursos necessários e prover uma estimativa dos
+esforços de teste.</p>
+<p>• Listar os elementos resultantes do projeto de testes.</p>
+<h2>Addtax Cloud</h2>
+<p>O AddTax é um sistema desenvolvido para automatizar o recebimento de documentos fiscais e não fiscais eletrônicos. Com o propósito de melhorar os fluxos de processamento e racionalizar a gestão de documentos fiscais eletrônicos, a fim de mitigar possíveis problemas no recebimento.</p>
+<h2>Addson</h2>
+<p>É um produto desenvolvido pela Addvisor com o propósito de gerenciar clientes, usuários, aplicativos e fornecer API's que otimizam tarefas manuais, controlam custos e garantem a segurança das aplicações.</p>
+<h2>Escopo</h2>
+<p>O sistema passará pelos testes de unidade, de integração, testes funcionais, também chamados de end-to-end e testes de carga.</p>
+<p>Os testes unitários e de integração vão lidar com a qualidade das funcionalidades, do sistema de bases de dados.
+Nesta fase será possível usar dados simulados e estes testes serão executados na máquina local de cada desenvolvedor e também estará vinculado ao sistema de implantação.</p>
+<p>Os testes funcionais testarão toda uma jornada do usuário, incluindo a interface do usuário e deverá ser executado em sistema idêntico a produção.</p>
+<p>Os testes de carga tratarão as questões de performance e infraestrutura e deverão ser realizados em ambiente controlado.</p>
+<h2>Identificação de Projeto</h2>
+<p>A tabela abaixo identifica os artefatos existentes necessários para
+desenvolver o plano de testes:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Documento</strong></th>
+<th><strong>Existente</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Documento de arquitetura</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Protótipo</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Especificação de requisitos</td>
+<td>❎</td>
+</tr>
+<tr>
+<td>Manual do usuário</td>
+<td>❎</td>
+</tr>
+<tr>
+<td>Documento de riscos</td>
+<td>❎</td>
+</tr>
+<tr>
+<td>Documentação técnica</td>
+<td>❎</td>
+</tr>
+</tbody>
+</table>
+<h1>2. Itens de teste</h1>
+<p>A lista abaixo identifica aqueles itens que foram identificados como alvos de
+teste. Essa lista representa o que será testado.</p>
+<h2>Microsserviços</h2>
+<ul>
+<li>Verificar que o funcionamento de cada rotina no nível mais unitário esteja funcionando conforme o esperado.</li>
+<li>Verificar que o código possua boas práticas de programação.</li>
+</ul>
+<h2>Banco de Dados</h2>
+<ul>
+<li>Verificar que os serviços que persistem dados possam realizar as seguintes ações:
+<ul>
+<li>list (Lista todos os registros)</li>
+<li>find (Lista com mais opções de filtro)</li>
+<li>get (Seleciona pelo ID)</li>
+<li>count (Contagem de registros)</li>
+<li>create (Cria um registro)</li>
+<li>replace (Substitui o registro completo)</li>
+<li>update (Atualiza parte do registro)</li>
+<li>remove (Deleta o registro)</li>
+</ul>
+</li>
+<li>Verificar que as ações adicionais customizadas por meio de mixins sejam executadas corretamente.</li>
+</ul>
+<h2>Armazenamento de Arquivos</h2>
+<ul>
+<li>Verificar que o sistema de armazenamento de arquivos esteja se comunicando corretamente com o repositório em nuvem.</li>
+</ul>
+<h2>Autenticação e Autorização</h2>
+<ul>
+<li>Verificar que os serviços estejam se comunicação corretamente com o provedor de identidade.</li>
+</ul>
+<h2>Teste de Componentes</h2>
+<ul>
+<li>Verificar que os seguintes processos estejam funcionando:
+<ul>
+<li>Coleta de documentos</li>
+<li>Extração de dados</li>
+<li>Execução de processos</li>
+</ul>
+</li>
+<li>Verificar que os seguintes aplicativos estejam funcionando:
+<ul>
+<li>CRM</li>
+<li>User Management</li>
+<li>App Management</li>
+</ul>
+</li>
+</ul>
+<h2>Teste de Segurança e de Controle de Acesso</h2>
+<ul>
+<li>Verificar que usuários não cadastrados não possam acessar o sistema.</li>
+<li>Verificar que os usuários somente acessam as informações que pertencem ao mandante deles.</li>
+<li>Verificar que os usuários do sistema podem acessar apenas as
+funcionalidades associadas ao seu usuário.</li>
+<li>Verificar que além do perfil administrador, ninguém mais pode inserir,
+atualizar ou remover dados que pertencem ao proprietário do sistema.</li>
+</ul>
+<h2>Teste da Interface do Usuário</h2>
+<ul>
+<li>Verificar que o usuário possa efetuar um processo de autenticação</li>
+<li>Verificar que o usuário possa acessar as interfaces gráficas que tenha direito.</li>
+<li>Verificar que os componentes gráficos estejam funcionando corretamente.</li>
+</ul>
+<h2>Teste de Performance</h2>
+<ul>
+<li>Verificar que o tempo de resposta dos serviços esteja abaixo do tempo máximo de espera.</li>
+<li>Verificar que o tempo de resposta das interfaces gráficas esteja de acordo com o esperado.</li>
+</ul>
+<h2>Teste de Carga</h2>
+<ul>
+<li>Verificar a resposta do sistema com 10 usuários usando uma determinada parte do sistema ao mesmo.</li>
+<li>Verificar a resposta do sistema com 100 usuários usando uma determinada parte do sistema ao mesmo tempo.</li>
+<li>Verificar a resposta do sistema com 1000 usuários usando uma determinada parte do sistema ao mesmo tempo.</li>
+</ul>
+<h1>3. Estratégia de Teste</h1>
+<h2>Tipos de Teste</h2>
+<ul>
+<li>
+<p>Testes unitários: Exercita a menor parte testável e determina se ele se comporta conforme o esperado, realizado em nível de método, ou função, validando regras de negócios. Exemplo: Tipo de campo, Obrigatoriedade de campos, Tamanho máximo, parâmetros e retorno. A ferramenta Jest será usada para comparar o resultado recebido com o resultado esperado, gerando relatório com o resultado dos testes e o percentual de cobertura de código.</p>
+</li>
+<li>
+<p>Testes integrados: Os testes de integração verificam como diferentes unidades do software funcionam juntos. Isso inclui testar interfaces, comunicação entre serviços e a integração com sistemas externos, como bancos de dados e APIs.
+A ferramenta <em>Jest</em> será usada para comparar o resultado recebido com o resultado esperado, gerando relatório com o resultado dos testes e o percentual de cobertura de código.</p>
+</li>
+<li>
+<p>Testes de componentes: Limita o escopo em uma parte do sistema testado. Aqui, todo um serviço ou módulo pode ser testado.
+A ferramenta <em>Playwright</em> será usada para simular a navegação de um usuário pelo processo.</p>
+</li>
+<li>
+<p>Testes de Interface de usuário: Verifica a funcionalidade do sistema focando em usabilidade, experiência do usuário, consistência das telas, layout, etc. E também pode incluir testes de acessibilidade que garantem que pessoas com algum tipo de necessidade especial também possam operar o sistema como, necessidade visual, física, auditiva, etc.<br>
+É neste nível que também pode ser automatizado um teste end-to-end, que representa toda a jornada de um usuário em determinado processo.
+A ferramenta <em>Playwright</em> será usada para simular a navegação de um usuário pelo processo.</p>
+</li>
+<li>
+<p>Testes exploratórios: Testes manuais visando explorar comportamentos atípicos dos usuários. (Dedo gordo, caminho infeliz, etc)</p>
+</li>
+<li>
+<p>Teste de carga: A ferramenta <em>Jmeter</em> será usada para simular acessos simultâneos ao sistema.</p>
+</li>
+</ul>
+<h2>Documentação de Testes</h2>
+<p>Uma documentação será gerada usando a ferramenta <em>JSdoc</em>, detalhando tecnicamente os requisitos que serão testados.</p>
+<h2>Ferramentas</h2>
+<p>As seguintes ferramentas serão empregadas para esse projeto:</p>
+<ul>
+<li><a href="https://jestjs.io/pt-BR/">Jest</a></li>
+<li><a href="https://playwright.dev/">Playwright</a></li>
+<li><a href="https://jmeter.apache.org/">Apache Jmeter</a></li>
+<li><a href="https://jsdoc.app/">JSdoc</a></li>
+</ul>
+<h1 id="recursos">Recursos</h1>
+<p>Essa seção apresenta os recursos recomendados para formar parte de uma equipe de Qualidade, suas principais responsabilidades, seus conhecimentos ou conjunto de habilidades.</p>
+<h2>Habilidades Requeridas</h2>
+<p>Essa tabela mostra as suposições de recrutamento para o projeto.</p>
+<table>
+<thead>
+<tr>
+<th><strong>Função</strong></th>
+<th><strong>Responsabilidades</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Diretor de qualidade</td>
+<td>Fornece supervisionamento gerencial. Responsabilidades: Prover direcionamento técnico, adquirir e administrar os recursos necessários, avaliar a eficiência do esforço de teste, fornecer relatórios de gerenciamento</td>
+</tr>
+<tr>
+<td>Engenheiro de qualidade</td>
+<td>Identificar, priorizar, e implementar os casos de teste. Responsabilidades: Gerar o plano de teste, implementar a arquitetura de testes, avaliar a qualidade do produto, documentar a execução dos testes</td>
+</tr>
+<tr>
+<td>Analista de testes</td>
+<td>Implementa e executa os testes. Responsabilidades: Implementar os testes, garantir a execução dos testes, registrar os resultados, analisar as falhas, documentar os incidentes</td>
+</tr>
+<tr>
+<td>Administrador do sistema de testes</td>
+<td>Garante que o ambiente e os bens de teste sejam gerenciados e mantidos. Responsabilidades: Administrar o sistema de gerenciamento de testes, garantir o funcionamento dos ambientes de testes, administrar os bancos de dados usados para teste,</td>
+</tr>
+</tbody>
+</table>
+<h2>Instalações de bibliotecas</h2>
+<p>Descreve o procedimento de instalação das bibliotecas comuns que podem ser necessárias na formatação e inspeção do código assim como a execução de testes.</p>
+<h3>Prettier - Formatação de código</h3>
+<blockquote>
+<p><strong>npm install prettier -D</strong></p>
+</blockquote>
+<p><em>.prettierrc</em></p>
+<pre class="prettyprint source lang-json"><code>{
+	&quot;printWidth&quot;: 120,
+	&quot;singleQuote&quot;: false,
+	&quot;tabWidth&quot;: 2,
+	&quot;useTabs&quot;: false,
+	&quot;trailingComma&quot;: &quot;none&quot;,
+	&quot;arrowParens&quot;: &quot;avoid&quot;,
+    &quot;bracketSpacing&quot;:true
+}
+</code></pre>
+<h3>ESLint - Inspeção de código</h3>
+<blockquote>
+<p><strong>npm init @eslint/config</strong></p>
+</blockquote>
+<pre class="prettyprint source"><code>✔ How would you like to use ESLint? · style
+✔ What type of modules does your project use? · commonjs
+✔ Which framework does your project use? · none
+✔ Does your project use TypeScript? · No
+✔ Where does your code run? · node
+✔ How would you like to define a style for your project? · guide
+✔ Which style guide do you want to follow? · airbnb
+✔ What format do you want your config file to be in? · JavaScript 
+</code></pre>
+<blockquote>
+<p><strong>npm install eslint-config-prettier -D</strong></p>
+</blockquote>
+<pre class="prettyprint source lang-json"><code>extends: [&quot;airbnb-base&quot;, &quot;prettier&quot;],
+ignorePatterns: [&quot;**/test/**&quot;],
+</code></pre>
+<h3>Jest - Testes</h3>
+<blockquote>
+<p><strong>npm install jest jest-cli jest-extended -D</strong></p>
+</blockquote>
+<p><em>package.json</em></p>
+<pre class="prettyprint source lang-json"><code>   &quot;jest&quot;: {
+    &quot;coverageDirectory&quot;: &quot;./src/services/test/coverage&quot;,
+    &quot;collectCoverageFrom&quot;: [
+      &quot;src/services/*.js&quot;
+    ],
+    &quot;coveragePathIgnorePatterns&quot;: [
+      &quot;src/services/test/&quot;
+    ],
+    &quot;testEnvironment&quot;: &quot;node&quot;,
+    &quot;moduleFileExtensions&quot;: [
+      &quot;ts&quot;,
+      &quot;tsx&quot;,
+      &quot;js&quot;
+    ],
+    &quot;testMatch&quot;: [
+      &quot;**/*.spec.(ts|js)&quot;
+    ],
+    &quot;setupFilesAfterEnv&quot;: [
+      &quot;jest-extended/all&quot;
+    ]
+  }
+</code></pre>
+<h3>JSDoc - Documentação</h3>
+<blockquote>
+<p><strong>npm install jsdoc ink-docstrap taffydb -D</strong><br>
+Copiar README.md com Plano de testes</p>
+</blockquote>
+<p><em>conf.json</em></p>
+<pre class="prettyprint source lang-json"><code>{
+	&quot;templates&quot;: {
+		&quot;systemName&quot;: &quot;Addson&quot;,
+		&quot;theme&quot;: &quot;cerulean&quot;,
+        &quot;copyright&quot; :  &quot;© Addson - 2023&quot;,
+		&quot;outputSourceFiles&quot;: true,
+		&quot;outputSourcePath&quot;: true,
+		&quot;linenums&quot; : true,
+		&quot;sort&quot;: false,
+		&quot;inverseNav&quot;: true
+	},
+
+	&quot;opts&quot;: {
+        &quot;template&quot;: &quot;./node_modules/ink-docstrap/template&quot;,  
+        &quot;destination&quot;: &quot;./src/services/test/doc&quot;,
+        &quot;recurse&quot;: true,
+		&quot;readme&quot;: &quot;./src/services/test/README.md&quot;
+    }
+}
+</code></pre>
+<h3>NPM Scripts</h3>
+<h4>Formatação de código</h4>
+<p><strong><code>npm run prettier</code></strong></p>
+<h4>Inspeção de código</h4>
+<p><strong><code>npm run dc:lint</code></strong></p>
+<h4>Testes Automatizados</h4>
+<p><strong><code>npm run dc:test</code></strong></p>
+<h4>Geração de Documentação</h4>
+<p><strong><code>npm run jsdoc</code></strong></p>
+<pre class="prettyprint source lang-json"><code>	&quot;ci&quot;: &quot;jest --watch --verbose&quot;,
+  &quot;test&quot;: &quot;jest --verbose&quot;,
+  &quot;test:unit&quot;: &quot;jest&quot;,
+  &quot;jsdoc&quot;: &quot;jsdoc -c ./src/services/test/conf.json ./src/services/test&quot;,
+  &quot;lint&quot;: &quot;eslint src/services --fix&quot;,
+  &quot;prettier&quot;: &quot;npx prettier src/services '!src/services/test' --write&quot;,
+  &quot;dc:lint&quot;: &quot;docker-compose -f docker-compose.yml build && docker-compose -f docker-compose.yml run tax-00100-api npm run lint&quot;,
+  &quot;dc:test&quot;: &quot;docker-compose -f docker-compose.yml build && docker-compose -f docker-compose.yml run *app* npm run test&quot;,
+</code></pre>
+<h3>Pre Commit</h3>
+<blockquote>
+<p><strong>npx husky-init &amp;&amp; npm install</strong></p>
+</blockquote>
+<p>npm run prettier<br>
+npm run lint<br>
+npm run dc:test</p>
+<h3>Git Hub Actions</h3>
+<p><em>unit.yml</em></p>
+<pre class="prettyprint source lang-yml"><code># Teste de Unidade
+name: Unit Test
+
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - '.vscode/**'
+      - '*.md'
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v2
+      with:
+            submodules: 'true'
+            token: ${{ secrets.PAT_TOKEN }}
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install dependencies
+      run: |
+        npm install
+
+    - name: Run unit tests
+      run: npm run test:unit
+</code></pre></article>
+    </section>
+
+
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-09-06T00:12:26-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
