@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width">
-	<title>Addson Source: unit/K040000100.service.spec.js</title>
+	<title>Addson Namespace: Testes</title>
 
 	<!--[if lt IE 9]>
 	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -31,9 +31,16 @@
 		<ul class="nav navbar-nav">
 			
 			<li class="dropdown">
-				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-Processo%2520100%2520-%2520Inicializa%25C3%25A7%25C3%25A3o.html">Processo 100 - Inicialização</a></li>
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
 				</ul>
 			</li>
 			
@@ -60,95 +67,124 @@
 <div class="row">
 
 	
-	<div class="col-md-12">
+	<div class="col-md-8">
 	
 		<div id="main">
 			
 
-		<h1 class="page-title">Source: unit/K040000100.service.spec.js</h1>
-    
+	<h1 class="page-title">Namespace: Testes</h1>
 <section>
-    <article>
-        <pre
-            class="sunlight-highlight-javascript linenums">"use strict";
-const { ServiceBroker } = require("moleculer");
-const service = require("../../K040000100.service");
 
-/**
- * &lt;strong>Especificação de Teste&lt;/strong>
- * @module Processo 100 - Inicialização
- */
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="add-tools-mail-api.html">add-tools-mail-api</a>.</span>
+        
+        Testes
+        </h2>
+        
+    
+</header>
 
-describe("Testando serviço 'K040000100'", () => {
-  const broker = new ServiceBroker({
-    logger: false
-  });
-  broker.createService(service);
 
-  beforeAll(() => {
-    process.env.SYSID = "RCD";
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Testes para os serviços contidos em <strong>add-tools-mail-api</strong></div>
+        
 
-    broker.start();
-    jest.setTimeout(30 * 1000);
-  });
-  afterAll(() => broker.stop());
+        
+<dl class="details">
+    
 
-  /**
-   * @summary Deveria ter uma descrição breve em cada serviço
-   * @name Descrição do serviço
-   * @instance
-   */
-  test("Deveria ter uma descrição breve em cada serviço", function () {
-    expect(service?.metadata?.$description).toEqual(expect.any(String));
-  });
+	
 
-  /**
-   * @summary Deveria ter um código IDAPP nas configurações de cada serviço
-   * @name IDAPP do serviço
-   * @instance
-   */
-  test("Deveria ter um código IDAPP nas configurações de cada serviço", function () {
-    expect(service?.settings?.IDAPP).toBeDefined();
-  });
+	
 
-  describe("Testando ação 'exit'", () => {
-    /**
-     * @summary Deveria ter uma descrição breve em cada ação
-     * @name Descrição da ação text
-     * @instance
-     */
-    test("Deveria ter uma descrição breve em cada ação", function () {
-      expect(service?.actions?.["exit"].description).toEqual(expect.any(String));
-    });
+	
 
-    /**
-     * @summary Deveria retornar uma string vazia se o parâmetro P_DOWN estiver vazio
-     * @name Ignorar rotina
-     * @instance
-     */
-    test("Deveria retornar uma string vazia se o parâmetro P_DOWN estiver vazio", async function () {
-      let resultado = null;
+    
 
-      try {
-        resultado = await broker.call(
-          "K040000100.exit",
-          { P_DOWN: "" },
-          { meta: {
-              user: { id: "ADD" } }
-          }
-        );
-      } catch (error) {
-        resultado = error;
-        console.log(error);
-      }
-      expect(resultado).toBe("");
-    });
-  });
-});
-</pre>
-    </article>
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+	<dt class="tag-source method-doc-label method-doc-details-label">Source:</dt>
+	<dd class="tag-source">
+		<ul class="dummy">
+			<li>
+				<a href="add-tools-mail-api_src_services_test_unit_mail-portal.service.spec.js.html">add-tools-mail-api/src/services/test/unit/mail-portal.service.spec.js</a>,
+				 <a href="add-tools-mail-api_src_services_test_unit_mail-portal.service.spec.js.html#sunlight-1-line-8">line 8</a>
+			</li>
+		</ul>
+	</dd>
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+        
+    
+    </div>
+
+    
+
+    
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Namespaces</h3>
+
+        <dl>
+            <dt><a href="namespaces.html#add-tools-mail-api.Testes.mail-portal"><a href="add-tools-mail-api.Testes.mail-portal.html">mail-portal</a></a></dt>
+            <dd></dd>
+        
+            <dt><a href="namespaces.html#add-tools-mail-api.Testes.mail-welcome"><a href="add-tools-mail-api.Testes.mail-welcome.html">mail-welcome</a></a></dt>
+            <dd></dd>
+        
+            <dt><a href="namespaces.html#add-tools-mail-api.Testes.mail"><a href="add-tools-mail-api.Testes.mail.html">mail</a></a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
 </section>
-
 
 
 
@@ -158,6 +194,10 @@ describe("Testando serviço 'K040000100'", () => {
 
 	<div class="clearfix"></div>
 
+	
+		<div class="col-md-3">
+			<div id="toc" class="col-md-3 hidden-xs hidden-sm hidden-md"></div>
+		</div>
 	
 
 </div>
@@ -190,7 +230,7 @@ describe("Testando serviço 'K040000100'", () => {
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
 	
-		on 2023-09-06T00:12:26-03:00
+		on 2023-12-08T17:37:19-03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

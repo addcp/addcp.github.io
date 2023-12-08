@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-platform-api/src/services/addplatform.service.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-platform-api/src/services/addplatform.service.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">const path = require("path");
+const fs = require("fs");
+const utilslib = require("add-base-utils-lib/libs/utils");
+
+/**
+ * @namespace {object} add-tools-platform-api
+ */
+module.exports = {
+	/**
+	 * O Serviço de addPlatform faz ...
+	 * @namespace add-tools-platform-api.addplatform
+	 * @memberof add-tools-platform-api
+	 * @property {string} name - Nome do serviço
+	 * @todo @property {number} version - Versão do serviço
+	 * @property {array} mixins - Mixins do serviço
+	 * @property {object} metadata - Metadados do serviço
+	 * @property {object} settings - Configurações do serviço
+	 * @property {object} actions - Ações do serviço: &lt;strong>callJava&lt;/strong> e &lt;strong>callVersion&lt;/strong>
+	 * @property {object} methods - Métodos do serviço: &lt;code>createHash()&lt;/code>, &lt;code>getMailInfo()&lt;/code>, &lt;code>encodeBase64()&lt;/code> e &lt;code>decodeBase64()&lt;/code>
+	 * @instance
+	 */
+	name: "addplatform",
+	// version: 1,
+	mixins: [],
+	metadata: { $description: "AddPlatform Java API" },
+	settings: {
+		IDAPP: `${/\add-\w*-\w*-api(?!.*\add-\w*-\w*-api)/.exec(__dirname)}`,
+		rest: true,
+		MONETIZATION: true,
+	},
+	/**
+	 * @summary actions
+	 * @property {object} callJava - Executa API Java {@link add-tools-platform-api.addplatform#callJava action callJava}
+	 * @property {object} callVersion - Teste Versao {@link add-tools-platform-api.addplatform#callVersion action callVersion}
+	 * @memberof add-tools-platform-api.addplatform#
+	 */
+	actions: {
+		/**
+		 * @desc A ação callJava ...
+		 * @summary Ação callJava
+		 * @action callJava
+		 * @memberof add-tools-platform-api.addplatform#
+		 * @property {string} description - Descrição da action
+		 * @property {string} rest - Rota da action
+		 * @property {object} params - Parâmetros da action
+		 * @property {string} [params.hash] - Hash da requisição
+		 * @property {array} permissions - Permissões da action
+		 */
+		callJava: {
+			description: "Executa API Java",
+			rest: "POST /",
+			params: {
+				hash: {
+					type: "string",
+					optional: true,
+				},
+			},
+			permissions: ["add-tools-platform-api", "ORG"],
+			async handler(ctx) {
+				const addResponse = {};
+				try {
+					// Procura maxBuffer em variavel de ambiente
+					// Caso nao encontre aplica o valor máximo de 30MB
+					// 30MB: 31457280 // 10MB 10485760
+					const maxBufferArg = process.env?.MAX_BUFFER
+						? process.env.MAX_BUFFER
+						: 31457280;
+
+					let hash = "";
+					let limitMailMessageSize = false;
+					let maxMailMessageSize = 0;
+					if (ctx.params.hash) hash = ctx.params.hash;
+					else if (ctx.params?.operation &amp;&amp; ctx.params?.parameters) {
+						if (ctx.params.parameters?.maxMailMessageSize) {
+							limitMailMessageSize = true;
+							maxMailMessageSize = parseInt(
+								ctx.params.parameters.maxMailMessageSize,
+							);
+						}
+						hash = this.createHash(ctx.params);
+					} else {
+						addResponse.addPlatform =
+							"ERRO: Parametros insuficientes";
+						return addResponse;
+					}
+
+					const callJarRequests = require("classes/callJar");
+					const callJarInstance = new callJarRequests(
+						hash,
+						maxBufferArg,
+					);
+					let response = await callJarInstance.execute();
+					if (limitMailMessageSize) {
+						if (response.length > maxMailMessageSize) {
+							const mailInfo = this.getMailInfo(response);
+							response = `&lt;ContextResponse>&lt;context>${mailInfo}&lt;/context>&lt;statusInfo>&lt;status>false&lt;/status>&lt;errorCode>400&lt;/errorCode>&lt;message>Tamanho do retorno acima do esperado&lt;/message>&lt;solution>Remover e-mail da caixa&lt;/solution>&lt;trace/>&lt;/statusInfo>&lt;/ContextResponse>`;
+						}
+					}
+					addResponse.addPlatform = response;
+				} catch (err) {
+					let exMsg = "ERRO: Exception ao processar requisicao";
+					try {
+						exMsg = `ERRO: Exception ao processar requisicao - ${JSON.stringify(
+							err,
+						)}`;
+					} catch (err2) {}
+					addResponse.addPlatform = "ERRO: Exception";
+					addResponse.exception = exMsg;
+				}
+				if (!addResponse.addPlatform)
+					addResponse.addPlatform =
+						"ERRO: Erro ao processar a requisicao";
+				return addResponse;
+			},
+			openapi: {
+				responses: {
+					200: {
+						description: "API executada com sucesso",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		/**
+		 * @desc A ação callVersion ...
+		 * @summary Ação callVersion
+		 * @action callVersion
+		 * @memberof add-tools-platform-api.addplatform#
+		 * @property {string} description - Descrição da action
+		 * @property {string} rest - Rota da action
+		 * @property {object} params - Parâmetros da action
+		 * @property {string} [params.hash] - Hash da requisição
+		 */
+		callVersion: {
+			description: "Teste Versao",
+			rest: "POST /",
+			params: {
+				hash: {
+					type: "string",
+					optional: true,
+				},
+			},
+			async handler(ctx) {
+				const addResponse = "20230321-13h25 - TESTE002 - JORGE";
+				return addResponse;
+			},
+			openapi: {
+				responses: {
+					200: {
+						description: "Testa Versao da aplicação",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	methods: {
+		/**
+		 * @desc O method &lt;code>createHash()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method createHash
+		 * @memberof add-tools-platform-api.addplatform#
+		 * @param {object} params - Parâmetros do método
+		 * @returns {string} - Hash da requisição
+		 */
+		createHash(params) {
+			const envelope =
+				'&lt;?xml version="1.0" encoding="iso-8859-1"?>&lt;asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">&lt;asx:values>&lt;STAB>&lt;CLASS>br.com.addtax.facade.AddTaxFacade&lt;/CLASS>&lt;METHOD>@OPERATION@&lt;/METHOD>&lt;PARAMETERS>@PARAMETERS@&lt;/PARAMETERS>&lt;/STAB>&lt;/asx:values>&lt;/asx:abap>';
+			const envParam =
+				"&lt;_-ADD_-ES_JAVA_API_PARAM>&lt;PARAMETER>@PARAMETER@&lt;/PARAMETER>&lt;VALUE>@VALUE@&lt;/VALUE>&lt;/_-ADD_-ES_JAVA_API_PARAM>";
+			let paramsStr = "";
+			if (
+				params.parameters &amp;&amp;
+				Object.keys(params.parameters).length > 0
+			) {
+				Object.keys(params.parameters).forEach(function (element) {
+					let eachParam = envParam;
+					eachParam = eachParam.replace("@PARAMETER@", element);
+					eachParam = eachParam.replace(
+						"@VALUE@",
+						params.parameters[element],
+					);
+					paramsStr += eachParam;
+				});
+			}
+
+			let finalEnvelope = envelope;
+			finalEnvelope = finalEnvelope.replace(
+				"@OPERATION@",
+				params.operation,
+			);
+			finalEnvelope = finalEnvelope.replace("@PARAMETERS@", paramsStr);
+			const hash = this.encodeBase64(finalEnvelope);
+			return hash;
+		},
+		/**
+		 * @desc O method &lt;code>getMailInfo()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method getMailInfo
+		 * @memberof add-tools-platform-api.addplatform#
+		 * @param {object} javaResponse - Parâmetros do método
+		 * @returns {string} - MailInfo
+		 */
+		getMailInfo(javaResponse) {
+			if (javaResponse) {
+				let mailInfoMessage = "";
+				try {
+					if (
+						javaResponse.indexOf("&lt;context>") > 0 &amp;&amp;
+						javaResponse.indexOf("&lt;/context>") > 0
+					) {
+						const responseCtx = javaResponse.substring(
+							javaResponse.indexOf("&lt;context>") + 9,
+							javaResponse.indexOf("&lt;/context>"),
+						);
+						if (!this._zlib) this._zlib = require("zlib");
+						const mailDecompress = this._zlib
+							.gunzipSync(Buffer.from(responseCtx, "base64"))
+							.toString();
+						mailInfoMessage = {
+							mailSubject: "",
+							mailSender: "",
+							mailSize: "",
+							mailId: "",
+						};
+						mailInfoMessage.mailSubject = mailDecompress.substring(
+							mailDecompress.indexOf("&lt;SUBJE>") + 7,
+							mailDecompress.indexOf("&lt;/SUBJE>"),
+						);
+						mailInfoMessage.mailSender = mailDecompress.substring(
+							mailDecompress.indexOf("&lt;SENDE>") + 7,
+							mailDecompress.indexOf("&lt;/SENDE>"),
+						);
+						mailInfoMessage.mailDtEnv = mailDecompress.substring(
+							mailDecompress.indexOf("&lt;DTENV>") + 7,
+							mailDecompress.indexOf("&lt;/DTENV>"),
+						);
+						mailInfoMessage.mailHrEnv = mailDecompress.substring(
+							mailDecompress.indexOf("&lt;HRENV>") + 7,
+							mailDecompress.indexOf("&lt;/HRENV>"),
+						);
+						mailInfoMessage.mailSize = mailDecompress.substring(
+							mailDecompress.indexOf("&lt;SIZEE>") + 7,
+							mailDecompress.indexOf("&lt;/SIZEE>"),
+						);
+						mailInfoMessage.mailId = mailDecompress.substring(
+							mailDecompress.indexOf("&lt;IDEME>") + 7,
+							mailDecompress.indexOf("&lt;/IDEME>"),
+						);
+						mailInfoMessage = this.encodeBase64(
+							JSON.stringify(mailInfoMessage),
+						);
+
+						return mailInfoMessage;
+					}
+				} catch (err) {
+					return "";
+				}
+			}
+		},
+		/**
+		 * @desc O method &lt;code>encodeBase64()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method encodeBase64
+		 * @memberof add-tools-platform-api.addplatform#
+		 * @param {object} str - Parâmetros do método
+		 * @returns {string} - string codificada em base64
+		 */
+		encodeBase64(str) {
+			return Buffer.from(str).toString("base64");
+		},
+		/**
+		 * @desc O method &lt;code>decodeBase64()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method decodeBase64
+		 * @memberof add-tools-platform-api.addplatform#
+		 * @param {object} str - Parâmetros do método
+		 * @returns {string} - string decodificada
+		 */
+		decodeBase64(str) {
+			return Buffer.from(str, "base64").toString("utf-8");
+		},
+	},
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:19-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

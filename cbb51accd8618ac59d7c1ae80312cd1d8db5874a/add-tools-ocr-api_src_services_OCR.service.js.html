@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-ocr-api/src/services/OCR.service.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-ocr-api/src/services/OCR.service.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">const tesseract = require("node-tesseract-ocr");
+const { AddsonServerError } = require("add-base-utils-lib/libs/customErrors");
+const sharp = require("sharp");
+const im = require("gm").subClass({ imageMagick: true });
+const fs = require("fs");
+const path = require("path");
+const { promises } = require("dns");
+/**
+ * @namespace {object} add-tools-ocr-api
+ */
+
+/**
+ * O Serviço de OCR faz o Reconhecimento Óptico de Caracteres em imagens e PDFs. &lt;/br>
+ * Ele tem duas ações principais: img e pdf. &lt;/br>
+ * Ele também tem um hook before para a ação img que verifica o template a ser utilizado no OCR. &lt;/br>
+ * Se nenhum template for especificado, o template 1 é usado por padrão.
+ * @namespace add-tools-ocr-api.OCR
+ * @property {string} name - Nome do serviço
+ * @property {object} metadata - Usado para armazenar qualquer metadados do serviço
+ * Estas informações podem ser acessadas via this.metadata e são transferidas para outros nós durante a chamada
+ * @property {string} metadata.$description - Descrição breve do serviço usada em listas automáticas
+ * @property {object} settings - Configurações internas do serviço
+ * @property {string} settings.IDAPP - ID do APP que pode ser usado em permissões
+ * @property {boolean} settings.MONETIZATION - Se estiver marcado, o usuário precisa ter um contrato para chamar este serviço
+ */
+module.exports = {
+	name: "OCR",
+	metadata: { $description: "OCR - Optical Character Recognition" },
+	settings: {
+		IDAPP: `${/add-\w*-\w*-api(?!.*add-\w*-\w*-api)/.exec(__dirname)}`,
+		MONETIZATION: true,
+	},
+	/**
+	 * O serviço OCR possui hooks
+	 * @summary Hooks do Serviço de OCR
+	 * @property {object} before - Executado antes da chamada da ação
+	 * @property {array} before.img - {@link add-tools-ocr-api.OCR#metodoTeste Lista de funções executadas antes da ação img}
+	 * @memberof add-tools-ocr-api.OCR#
+	 * @see {@link add-tools-ocr-api.OCR#getTemplate methods getTemplate}
+	 */
+	hooks: {
+		before: {
+			img: [this.getTemplate],
+		},
+	},
+	/**
+	 * @summary Actions do serviço
+	 * @property {object} img - Processa arquivos com formato de imagem {@link add-tools-ocr-api.OCR#img action img}
+	 * @property {object} pdf - Tenta chamar a action text do Serviço PDF {@link add-tools-ocr-api.OCR#pdf action pdf}
+	 * @memberof add-tools-ocr-api.OCR#
+	 */
+	actions: {
+		/**
+		 * A ação img recebe uma imagem (como uma URL, um caminho de arquivo ou um buffer) e retorna o texto contido nela. &lt;/br>
+		 * A imagem pode ser pré-processada antes do OCR, incluindo: a conversão para escala de cinza, redimensionamento, aplicação de um limite e a extensão da imagem.
+		 * @summary Ação img
+		 * @action img
+		 * @memberof add-tools-ocr-api.OCR#
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} rest - Rota da ação: "POST /"
+		 * @property {object} params - Parâmetros da ação
+		 * @property {string} [params.input] - Imagem a ser processada. Pode ser no formato de URL, um caminho para o filesystem ou um buffer
+		 * @property {string} [params.base64] - Imagem a ser processada no formato base64
+		 * @property {number} [params.resize] - Tamanho que a imagem será redimensionada
+		 * @property {boolean} [params.removeBorder=false] - Remove bordas da imagem no formato de tabela
+		 * @property {object} [params.config] - Configurações do OCR
+		 * @property {array} [permissions] - Permissões da ação. Se estiver preenchido, o usuário precisa ter todas as permissões listadas para executar
+		 * @returns {object} Retorna um objeto com uma única propriedade result, que contém o texto extraído da imagem
+		 * @throws {AddsonServerError} ERR_OCR_IMG - Erro no servidor OCR
+		 */
+		img: {
+			description: "Send image file to OCR",
+			rest: "POST /",
+			params: {
+				input: {
+					// URL ou Path ou Buffer
+					type: "string",
+					optional: true,
+				},
+				base64: { type: "string", base64: true, optional: true }, // Img Base64
+				resize: { type: "number", optional: true },
+				removeBorder: {
+					type: "boolean",
+					optional: true,
+					default: false,
+				},
+				config: {
+					type: "object",
+					optional: true,
+				},
+			},
+			permissions: ["add-tools-ocr-api", "ORG"],
+			async handler(ctx) {
+				try {
+					let preProcess;
+					if (ctx.params.base64) {
+						let buf = Buffer.from(ctx.params.base64, "base64");
+						ctx.params.input = buf;
+
+						ctx.locals.file = path.join(__dirname, "original.png");
+						await fs.promises.writeFile(
+							ctx.locals.file,
+							ctx.params.input,
+						);
+
+						// Pre Processing Image Buffer
+						if (ctx?.params?.removeBorder) {
+							await new Promise((resolve, reject) => {
+								im(buf)
+									.type("Grayscale")
+									.negative(true)
+									.compose("darken")
+									//   .define("morphology:compose=darken")
+									.out(
+										"-morphology",
+										"Thinning",
+										"Rectangle:1x20+0+0",
+									)
+									.out(
+										"-morphology",
+										"Thinning",
+										"Rectangle:20x1+0+0",
+									)
+									.negative(true)
+									.toBuffer("PNG", async (err, buffer) => {
+										if (err) reject(err);
+										buf = buffer;
+										resolve();
+									});
+							});
+						}
+
+						preProcess = await sharp(buf);
+						if (ctx?.params?.greyscale) {
+							preProcess = preProcess.greyscale();
+						}
+
+						if (ctx?.params?.resize) {
+							preProcess = preProcess.resize({
+								height: ctx?.params?.resize,
+							});
+						}
+						if (ctx?.params?.threshold) {
+							preProcess = preProcess.threshold(
+								ctx?.params?.threshold,
+								{ greyscale: true },
+							);
+						}
+						if (ctx?.params?.extend) {
+							preProcess = preProcess.extend({
+								top: 20,
+								bottom: 20,
+								left: 20,
+								right: 20,
+								background: {
+									r: 255,
+									g: 255,
+									b: 255,
+									alpha: 1,
+								},
+							});
+						}
+						const imageAfterProcess = await preProcess
+							.png()
+							.toBuffer();
+
+						ctx.locals.file2 = path.join(__dirname, "final.png");
+						await fs.promises.writeFile(
+							ctx.locals.file2,
+							imageAfterProcess,
+						);
+						ctx.params.input = imageAfterProcess;
+					}
+					const text = await tesseract.recognize(
+						ctx.params.input,
+						ctx.params.config,
+					);
+					return { result: text };
+				} catch (error) {
+					throw new AddsonServerError(
+						"OCR Server Error",
+						500,
+						"ERR_OCR_IMG",
+						{
+							IDAPP: ctx.params.IDAPP,
+							ACTION: ctx.action.name,
+							ERROR: JSON.stringify(error),
+						},
+					);
+				}
+			},
+			openapi: {
+				responses: {
+					200: {
+						description: "OCR processado com sucesso",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+								},
+							},
+						},
+					},
+				},
+				requestBody: {
+					content: {
+						"application/json": {
+							examples: {
+								URLSP: {
+									summary: "URL SP",
+									value: {
+										MANDT: "ADD-0001",
+										input: "https://i.pinimg.com/originals/bb/91/05/bb9105aaea7d24e5f4449c46257d3b64.gif",
+									},
+								},
+								URLRJ: {
+									summary: "URL RJ",
+									value: {
+										MANDT: "ADD-0001",
+										input: "https://wiki.dealernet.com.br/images/c/c4/Modelorps4.jpg",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		/**
+		 * @desc A ação pdf tenta chamar o serviço "PDF.text" {@link @link add-tools-ocr-api.PDF#text PDF.text} com os parâmetros fornecidos no contexto (ctx.params). &lt;/br>
+		 * O resultado dessa chamada (que é uma Promise) é aguardado e o valor resolvido é armazenado na variável text. &lt;/br>
+		 * Se a chamada ao serviço "PDF.text" for bem-sucedida, a função retorna um objeto com uma única propriedade result, que contém o texto extraído do serviço "PDF.text".
+		 * @summary Action pdf
+		 * @action pdf
+		 * @memberof add-tools-ocr-api.OCR#
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} rest - Rota da ação
+		 * @property {object} params - Parâmetros da ação: "POST /"
+		 * @property {string} [params.fileName] - nome do arquivo PDF a ser processado
+		 * @property {string} [params.base64] - PDF a ser processado codificado em formato base64
+		 * @property {string} [params.type="ocr"] - Tipo de processamento do PDF, pode ser "text" ou "ocr", mas "ocr" é o padrão.
+		 * @property {array} permissions - Permissões da ação. Se estiver preenchido, o usuário precisa ter todas as permissões listadas para executar
+		 * @returns {object} Retorna um objeto com uma única propriedade result, que contém o texto extraído do PDF
+		 * @throws {AddsonServerError} ERR_OCR_PDF - Erro no servidor OCR
+		 */
+		pdf: {
+			description: "Send pdf file to OCR",
+
+			rest: "POST /",
+			params: {
+				fileName: {
+					type: "string",
+					optional: true,
+				},
+				base64: { type: "string", base64: true, optional: true },
+				type: {
+					type: "string",
+					optional: true,
+					default: "ocr",
+					enum: ["text", "ocr"],
+				},
+			},
+			permissions: ["add-tools-ocr-api", "ORG"],
+			async handler(ctx) {
+				try {
+					const text = await ctx.call("PDF.text", ctx.params);
+					return { result: text };
+				} catch (error) {
+					throw new AddsonServerError(
+						"OCR Server Error",
+						500,
+						"ERR_OCR_PDF",
+						{
+							IDAPP: ctx.params.IDAPP,
+							ACTION: ctx.action.name,
+						},
+					);
+				}
+			},
+			openapi: {
+				responses: {
+					200: {
+						description: "PDF processado com sucesso",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+
+	methods: {
+		/**
+		 * Função para verificar o template a ser utilizado no OCR. &lt;/br>
+		 * Caso não seja informado um template, o template 1 é utilizado por padrão.
+		 * @function getTemplate
+		 * @param {object} ctx - Contexto da requisição
+		 * @memberof add-tools-ocr-api.OCR#
+		 */
+		getTemplate(ctx) {
+			switch (ctx?.params?.config?.template) {
+				default:
+				case 1:
+					ctx.params.config = {
+						lang: "eng+por",
+						oem: 3,
+						psm: 6,
+						textord_heavy_nr: 1,
+						tessedit_char_blacklist: "]",
+					};
+					// ctx.params.resize = ctx.params.resize || 1200;
+					break;
+
+				case 2:
+					ctx.params.config = {
+						lang: "eng+por",
+						oem: 3,
+						psm: 4,
+						textord_heavy_nr: 1,
+					};
+					// ctx.params.resize = ctx.params.resize || 1270;
+					// ctx.params.threshold = ctx.params.threshold || 160;
+					break;
+			}
+		},
+	},
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:19-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

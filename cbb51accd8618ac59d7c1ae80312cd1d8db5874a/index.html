@@ -31,9 +31,16 @@
 		<ul class="nav navbar-nav">
 			
 			<li class="dropdown">
-				<a href="modules.list.html" class="dropdown-toggle" data-toggle="dropdown">Modules<b class="caret"></b></a>
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
 				<ul class="dropdown-menu ">
-					<li><a href="module-Processo%2520100%2520-%2520Inicializa%25C3%25A7%25C3%25A3o.html">Processo 100 - Inicialização</a></li>
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
 				</ul>
 			</li>
 			
@@ -115,7 +122,38 @@ Esta documentação descreve a aplicação de processos de qualidade de software
 </tr>
 </tbody>
 </table>
-
+<h2>Índice</h2>
+<p>1. <a href="#introdu%C3%A7%C3%A3o">Introdução</a></p>
+<ul>
+<li><a href="#objetivos">Objetivos</a></li>
+<li><a href="#addtax-cloud">Addtax Cloud</a></li>
+<li><a href="#addson">Addson</a></li>
+<li><a href="#escopo">Escopo</a></li>
+<li><a href="#identifica%C3%A7%C3%A3o-de-projeto">Identificação de Projeto</a></li>
+</ul>
+<p>2. <a href="#itens-de-teste">Itens de Teste</a></p>
+<ul>
+<li><a href="#microsservi%C3%A7os">Microsserviços</a></li>
+<li><a href="#banco-de-dados">Banco de Dados</a></li>
+<li><a href="#armazenamento-de-arquivos">Armazenamento de Arquivos</a></li>
+<li><a href="#autentica%C3%A7%C3%A3o-e-autoriza%C3%A7%C3%A3o">Autenticação e Autorização</a></li>
+<li><a href="#teste-de-componentes">Teste de componentes</a></li>
+<li><a href="#teste-de-seguran%C3%A7a-e-de-controle-de-acesso">Teste de Segurança e de Controle de Acesso</a></li>
+<li><a href="#teste-da-interface-do-usu%C3%A1rio">Teste da Interface do Usuário</a></li>
+<li><a href="#teste-de-performance">Teste de Performance</a></li>
+<li><a href="#teste-de-carga">Teste de Carga</a></li>
+</ul>
+<p>3. <a href="#estrat%C3%A9gia-de-teste">Estratégia de Teste</a></p>
+<ul>
+<li><a href="#tipos-de-teste">Tipos de Teste</a></li>
+<li><a href="#documenta%C3%A7%C3%A3o-de-testes">Documentação de Testes</a></li>
+<li><a href="#ferramentas">Ferramentas</a></li>
+</ul>
+<p>4. <a href="#recursos">Recursos</a></p>
+<ul>
+<li><a href="#habilidades-requeridas">Habilidades Requeridas</a></li>
+<li><a href="#instala%C3%A7%C3%B5es-de-bibliotecas">Instalação de bibliotecas</a></li>
+</ul>
 <h1>Introdução</h1>
 <h2>Objetivos</h2>
 <p>Esse documento do Plano de Testes do sistema Addson compõe-se dos seguintes objetivos:</p>
@@ -342,7 +380,9 @@ A ferramenta <em>Playwright</em> será usada para simular a navegação de um us
 ✔ Where does your code run? · node
 ✔ How would you like to define a style for your project? · guide
 ✔ Which style guide do you want to follow? · airbnb
-✔ What format do you want your config file to be in? · JavaScript 
+✔ What format do you want your config file to be in? · JavaScript
+✔ Would you like to install them now? · No / Yes
+? Which package manager do you want to use? npm
 </code></pre>
 <blockquote>
 <p><strong>npm install eslint-config-prettier -D</strong></p>
@@ -352,7 +392,8 @@ ignorePatterns: [&quot;**/test/**&quot;],
 </code></pre>
 <h3>Jest - Testes</h3>
 <blockquote>
-<p><strong>npm install jest jest-cli jest-extended -D</strong></p>
+<p><strong>npm install jest jest-cli -D</strong>
+<strong>npm install jest-extended -D</strong></p>
 </blockquote>
 <p><em>package.json</em></p>
 <pre class="prettyprint source lang-json"><code>   &quot;jest&quot;: {
@@ -403,6 +444,19 @@ Copiar README.md com Plano de testes</p>
     }
 }
 </code></pre>
+<h3>Dockerfile e docker-compose</h3>
+<p>É necessário ajustar o dockerfile para build multi stage test e prod
+É necessário criar um docker-compose local para efeito de teste unitário</p>
+<pre class="prettyprint source"><code>FROM base as test
+RUN npm install --include=dev
+COPY . .
+CMD [&quot;npm&quot;, &quot;run&quot;, &quot;test&quot;]
+
+FROM base as prod
+RUN npm pkg delete scripts.prepare && npm install --omit-dev
+COPY . .
+CMD [&quot;npm&quot;, &quot;start&quot;]
+</code></pre>
 <h3>NPM Scripts</h3>
 <h4>Formatação de código</h4>
 <p><strong><code>npm run prettier</code></strong></p>
@@ -412,6 +466,8 @@ Copiar README.md com Plano de testes</p>
 <p><strong><code>npm run dc:test</code></strong></p>
 <h4>Geração de Documentação</h4>
 <p><strong><code>npm run jsdoc</code></strong></p>
+<h4>Instalação dependências Dev</h4>
+<p><strong><code>npm install --only=dev</code></strong></p>
 <pre class="prettyprint source lang-json"><code>	&quot;ci&quot;: &quot;jest --watch --verbose&quot;,
   &quot;test&quot;: &quot;jest --verbose&quot;,
   &quot;test:unit&quot;: &quot;jest&quot;,
@@ -518,7 +574,7 @@ jobs:
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
 	
-		on 2023-09-06T00:12:26-03:00
+		on 2023-12-08T17:37:19-03:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

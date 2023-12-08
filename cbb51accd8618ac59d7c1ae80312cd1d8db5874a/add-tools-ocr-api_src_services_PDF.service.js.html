@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-ocr-api/src/services/PDF.service.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-ocr-api/src/services/PDF.service.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">const pdfExtract = require("pdf-extract");
+const { AddsonServerError } = require("add-base-utils-lib/libs/customErrors");
+const path = require("path");
+const fs = require("fs");
+
+/**
+ * @desc O Serviço de PDF extrai texto de arquivos PDF.&lt;/br>
+ * O Serviço tem uma ação principal: text. &lt;/br>
+ * Ele também tem um método &lt;strong>extractText()&lt;/strong> que recebe o caminho para o arquivo PDF e o tipo de processamento.
+ * @namespace add-tools-ocr-api.PDF
+ * @memberof add-tools-ocr-api
+ * @property {string} name - Nome do serviço
+ * @todo @property {number} version - Versão do serviço
+ * @property {array} mixins - Usado para distribuir funcionalidades reutilizáveis para os serviços
+ * @property {object} metadata - Usado para armazenar qualquer metadados do serviço
+ * @property {string} metadata.$description - Descrição breve do serviço usada em listas automáticas
+ * @property {object} settings - Configurações internas do serviço
+ * @property {string} settings.IDAPP - ID do APP que pode ser usado em permissões
+ * @todo @property {boolean} settings.rest - Se estiver marcado, o serviço será acessível via REST
+ */
+module.exports = {
+	name: "PDF",
+	// version: 1,
+	mixins: [],
+	metadata: { $description: "Extract text from PDF" },
+	settings: {
+		IDAPP: `${/add-\w*-\w*-api(?!.*\\add-\w*-\w*-api)/.exec(__dirname)}`,
+		// rest: true
+	},
+
+	/**
+	 * @summary Actions do serviço
+	 * @property {object} text - Processa arquivos com formato PDF {@link add-tools-ocr-api.PDF#text action text}
+	 * @memberof add-tools-ocr-api.PDF#
+	 * @instance
+	 */
+	actions: {
+		/**
+		 * @desc A ação text recebe um arquivo PDF (como uma string base64) e um tipo de processamento ("text" ou "ocr"). &lt;/br>
+		 * Se o tipo de processamento não for especificado, será definido "text" por padrão. &lt;/br>
+		 * A ação salva o arquivo PDF, extrai o texto dele usando o método &lt;strong>extractText()&lt;/strong>, e retorna o texto extraído. &lt;/br>
+		 * Se ocorrer um erro durante este processo, um erro de servidor é lançado.
+		 * @summary Ação text
+		 * @action text
+		 * @memberof add-tools-ocr-api.PDF#
+		 * @property {string} description - Descrição da action
+		 * @property {string} rest - Rota da action: "POST /"
+		 * @property {object} params - Parâmetros da action
+		 * @property {string} [params.fileName] - Nome do arquivo a ser processado
+		 * @property {string} params.base64 - PDF a ser processado codificado em formato base64
+		 * @property {string} [params.type="text"] - Tipo de processamento do PDF (text ou ocr)
+		 * @returns {string} Retorna o texto extraído do PDF
+		 * @throws {AddsonServerError} - ERR_PDF_TEXT - Erro no servidor OCR
+		 */
+		text: {
+			description: "PDF to Text",
+			rest: "POST /",
+			params: {
+				fileName: {
+					type: "string",
+					optional: true,
+				},
+				base64: { type: "string", base64: true },
+				type: {
+					type: "string",
+					optional: true,
+					default: "text",
+					enum: ["text", "ocr"],
+				},
+			},
+			async handler(ctx) {
+				try {
+					ctx.params.fileName = `${ctx.id}.pdf`;
+					ctx.locals.file = path.join(__dirname, ctx.params.fileName);
+					await fs.promises.writeFile(
+						ctx.locals.file,
+						ctx.params.base64,
+						{ encoding: "base64" },
+					);
+					ctx.locals.file = path.join(__dirname, ctx.params.fileName);
+					const text = await this.extractText(
+						ctx.locals.file,
+						ctx.params.type,
+					);
+					fs.unlink(ctx.locals.file, () => {
+						// if (err) throw err;
+					});
+					return text.text_pages;
+				} catch (error) {
+					throw new AddsonServerError(
+						"OCR Server Error",
+						500,
+						"ERR_PDF_TEXT",
+						{
+							IDAPP: ctx.params.IDAPP,
+							ACTION: ctx.action.name,
+							TYPE: ctx.params.type,
+						},
+					);
+				}
+			},
+			openapi: {
+				responses: {
+					200: {
+						description: "PDF processado com sucesso",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+
+	methods: {
+		/**
+		 * A função &lt;strong>extractText()&lt;/strong> recebe como parâmetro o caminho para o arquivo PDF e o tipo de processamento. &lt;/br>
+		 * Se o tipo de processamento for "ocr", ele usará o OCR para extrair o texto.
+		 * @summary Método para extração de texto
+		 * @function extractText
+		 * @param {string} filePath - Caminho para do aqruivo
+		 * @param {string} type - Tipo de processamento "text" ou "ocr"
+		 * @returns {string} - Texto extraído do PDF
+		 * @memberof add-tools-ocr-api.PDF#
+		 */
+		async extractText(filePath, type) {
+			const absolutePathToPdf = path.resolve(filePath);
+
+			const options = {
+				type, // extract searchable text from PDF
+				// ocr_flags: ["-l por", "--oem 3", "--psm 3", "-c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyz"], // ocr options
+				ocr_flags: [
+					"-l por",
+					"--oem 3",
+					"--psm 4",
+					// "-c textord_heavy_nr=1",
+				], // ocr options
+				enc: "UTF-16", // optional, encoding to use for the text output
+				clean: true,
+				mode: "layout", // optional, mode to use when reading the pdf
+			};
+
+			return new Promise((resolve, reject) => {
+				const processor = pdfExtract(
+					absolutePathToPdf,
+					options,
+					() => {},
+				);
+
+				processor.on("complete", resolve);
+				processor.on("error", (err) => {
+					reject(err);
+				});
+			});
+		},
+	},
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:19-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

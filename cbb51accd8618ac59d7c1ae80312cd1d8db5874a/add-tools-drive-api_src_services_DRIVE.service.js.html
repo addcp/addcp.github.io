@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-drive-api/src/services/DRIVE.service.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-drive-api/src/services/DRIVE.service.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">"use strict";
+const DriveMixin = require("storage/drive");
+const { Response } = require("node-fetch");
+const { AddsonClientError } = require("add-base-utils-lib/libs/customErrors");
+
+/**
+ * @namespace {object} add-tools-drive-api
+ */
+
+module.exports = {
+	/**
+	 * O Serviço de DRIVE interage com um sistema de armazenamento (local ou S3) para criar, obter em base64, verificar se existe, obter estatísticas, obter conteúdo, obter fluxo (Stream) e deletar arquivos. &lt;/br>
+	 * Ele também possui um canal para escutar um evento e criar uma identificação de uma corporação no S3 quando uma corporação é criada.
+	 * @namespace add-tools-drive-api.DRIVE
+	 * @property {string} name - Nome do serviço
+	 * @property {object} mixins - Mixins do serviço
+	 * @property {array} mixins.DriveMixin - O Mixin DriveMixin é responsável por criar um sistema de armazenamento
+	 * @property {object} metadata - Usado para armazenar qualquer metadados do serviço
+	 * Estas informações podem ser acessadas via this.metadata e são transferidas para outros nós durante a chamada
+	 * @property {string} metadata.$description - Descrição breve do serviço usada em listas automáticas
+	 * @property {object} settings - Configurações internas do serviço
+	 * @property {string} settings.IDAPP - ID do APP que pode ser usado em permissões para chamar este serviço
+	 * @property {boolean} settings.rest - Se o serviço é REST ou não
+	 * @property {string} settings.STORAGE_ROOT - Diretório raiz do armazenamento: "/upload"
+	 * @property {object} settings.storageConfig - Configurações do armazenamento
+	 * @property {object} settings.storageConfig.disks - Tipos de discos do armazenamento
+	 * @property {object} settings.storageConfig.disks.local - Disco local
+	 * @property {String} settings.storageConfig.disks.local.driver - Driver do disco local
+	 * @property {object} settings.storageConfig.disks.s3 - Disco S3
+	 * @property {String} settings.storageConfig.disks.s3.driver - Driver do disco S3
+	 * @property {object} settings.storageConfig.disks.s3.config - Configurações do disco S3
+	 */
+	name: "DRIVE",
+	mixins: [DriveMixin()],
+	metadata: { $description: "Drive Storage" },
+	settings: {
+		IDAPP: `${/\add-\w*-\w*-api(?!.*\add-\w*-\w*-api)/.exec(__dirname)}`,
+		rest: false,
+		STORAGE_ROOT: "/upload",
+		storageConfig: {
+			default: "local",
+			disks: {
+				local: {
+					driver: "local",
+				},
+				s3: {
+					driver: "s3",
+					config: {
+						key: process.env.AWS_ACCESS_KEY_ID,
+						secret: process.env.AWS_SECRET_ACCESS_KEY,
+						region: process.env.S3_REGION,
+						bucket: process.env.S3_BUCKET,
+						storageClass: process.env.S3_STORAGE_CLASS,
+						// endpoint: process.env.S3_ENDPOINT,
+					},
+				},
+				// ftp: {
+				// 	driver: "ftp",
+				// 	host: "FTP_HOST",
+				// 	port: 21,
+				// 	user: "FTP_USER",
+				// 	pass: "FTP_PASS",
+				// 	longLive: false,
+				// },
+			},
+		},
+	},
+	/**
+	 * @summary Actions do serviço
+	 * @property {object} create - Action create {@link add-tools-drive-api.DRIVE#create action create}
+	 * @property {object} getBase64 - Action getBase64 {@link add-tools-drive-api.DRIVE#getBase64 action getBase64}
+	 * @property {object} exists - Action exists {@link add-tools-drive-api.DRIVE#exists action exists}
+	 * @property {object} getStat - Action getStat {@link add-tools-drive-api.DRIVE#getStat action getStat}
+	 * @property {object} getContent - Action getContent {@link add-tools-drive-api.DRIVE#getContent action getContent}
+	 * @property {object} getStream - Action getStream {@link add-tools-drive-api.DRIVE#getStream action getStream}
+	 * @property {object} delete - Action delete {@link add-tools-drive-api.DRIVE#delete action delete}
+	 * @memberof add-tools-drive-api.DRIVE#
+	 */
+	actions: {
+		/**
+		 * Ação para criar um arquivo no sistema de armazenamento. &lt;/br>
+		 * Ela recebe o nome do arquivo &lt;strong>filename&lt;/strong>, o conteúdo &lt;strong>fileContent&lt;/strong> em diferentes formatos (string, Buffer ou Stream), ou uma string codificada em Base64 &lt;strong>base64&lt;/strong>.
+		 * Ela retorna a chamada da função this.storage (que vem do Mixin DriveMixin). Essa função é chamada com os métodos &lt;strong>disk&lt;/strong> (com o parâmetro "s3") e &lt;strong>create&lt;/strong> (com os parâmetros filename e fileContent).
+		 * @summary Ação create
+		 * @action create
+		 * @memberof add-tools-drive-api.DRIVE#
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} params.filename - Nome do arquivo
+		 * @property {array} [params.fileContent] - Conteúdo do arquivo que pode ser uma string, Buffer ou Stream
+		 * @property {string} [params.base64] - Conteúdo do arquivo em base64
+		 * @returns {Promise&lt;any>} Promessa que resolve quando o arquivo é criado.
+		 */
+		create: {
+			description: "Create File",
+			params: {
+				filename: "string",
+				fileContent: [
+					{ type: "string", optional: true },
+					{ type: "class", instanceOf: Buffer, optional: true },
+					{
+						type: "class",
+						instanceOf: ReadableStream,
+						optional: true,
+					},
+				],
+				base64: {
+					type: "string",
+					// base64: true,
+					optional: true,
+				},
+			},
+			async handler(ctx) {
+				if (ctx.params.base64) {
+					ctx.params.fileContent = Buffer.from(
+						ctx.params.base64,
+						"base64",
+					);
+				}
+				return await this.storage
+					.disk("s3")
+					.create(ctx.params.filename, ctx.params.fileContent);
+			},
+		},
+		/**
+		 * Ação para retornar o conteúdo de um arquivo em Base64. &lt;/br>
+		 * Ela recebe o nome do arquivo &lt;strong>filename&lt;/strong> e retorna o conteúdo em Base64 ou uma mensagem de erro.
+		 * @summary Ação getBase64
+		 * @action getBase64
+		 * @memberof add-tools-drive-api.DRIVE#
+		 * @property {string} description - - Descrição breve da ação usada em listas automáticas
+		 * @property {object} params - Parâmetros da ação
+		 * @property {string} params.filename - Nome do arquivo
+		 * @returns {string} Conteúdo do arquivo em Base64
+		 */
+		getBase64: {
+			description: "Get Base64 from File",
+			params: {
+				filename: "string",
+			},
+			async handler(ctx) {
+				try {
+					const fileStream = await this.storage
+						.disk("s3")
+						.getStream(ctx.params.filename);
+					const res = new Response(fileStream);
+					const buffer = await res.arrayBuffer();
+					return Buffer.from(buffer).toString("base64");
+				} catch (error) {
+					throw new AddsonClientError(
+						"Context required",
+						400,
+						"ERR_HAS_NO_CONTEXT",
+					);
+				}
+			},
+		},
+		/**
+		 * Ação para verificar se um arquivo existe. &lt;/br>
+		 * Ela recebe o nome do arquivo &lt;strong>filename&lt;/strong> e retorna um booleano indicando se o arquivo existe ou não.
+		 * @summary Ação exists
+		 * @action exists
+		 * @memberof add-tools-drive-api.DRIVE#
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} params.filename - Nome do arquivo
+		 * @returns {boolean} Retorna o caminho do arquivo
+		 */
+		exists: {
+			description: "Check if file exists",
+			params: {
+				filename: "string",
+			},
+			async handler(ctx) {
+				// let result = await this.storage.disk().exists(ctx.params.filename);
+				// let result = await this.storage.disk("local").exists(ctx.params.filename);
+				const result = await this.storage
+					.disk("s3")
+					.exists(ctx.params.filename);
+				return result;
+				// return await this.storage.exists(ctx.params.filename); //will use the default storage defined
+			},
+		},
+		/**
+		 * Ação para retornar estatísticas de um arquivo. &lt;/br>
+		 * Ela recebe o nome do arquivo &lt;strong>filename&lt;/strong> e retorna um objeto com as estatísticas do arquivo.
+		 * @summary Ação getStat
+		 * @action getStat
+		 * @memberof add-tools-drive-api.DRIVE#
+		 * @property {string} description - Descrição da action
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} params.filename - Nome do arquivo
+		 * @returns {object} Estatísticas do arquivo
+		 */
+		getStat: {
+			description: "Return Stats from file",
+			params: {
+				filename: "string",
+			},
+			async handler(ctx) {
+				const result = await this.storage
+					.disk("s3")
+					.getStat(ctx.params.filename);
+				return result;
+			},
+		},
+		/**
+		 * Ação para retornar o conteúdo de um arquivo. &lt;/br>
+		 * Ela recebe como parâmetro: o nome do arquivo &lt;strong>filename&lt;/strong> e a codificação &lt;strong>encoding&lt;/strong>&lt;/br>
+		 * Ela retorna o conteúdo do arquivo como string.
+		 * @summary Ação getContent
+		 * @action getContent
+		 * @memberof add-tools-drive-api.DRIVE#
+		 * @property {string} description - Descrição da action
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} params.filename - Nome do arquivo
+		 * @property {string} [params.encoding="utf-8"] - Codificação do arquivo
+		 * @returns {string} Conteúdo do arquivo como string
+		 */
+		getContent: {
+			description: "Return content as string",
+			params: {
+				filename: "string",
+				encoding: { type: "string", optional: true, default: "utf-8" },
+			},
+			async handler(ctx) {
+				return await this.storage
+					.disk("s3")
+					.get(ctx.params.filename, ctx.params.encoding);
+			},
+		},
+		/**
+		 * Ação para retornar o conteúdo de um arquivo como um fluxo (Stream) do armazenamento S3.&lt;/br>
+		 * Ela recebe o nome do arquivo &lt;strong>filename&lt;/strong> e retorna o conteúdo do arquivo como um fluxo (Stream).
+		 * @summary Ação getStream
+		 * @action getStream
+		 * @memberof add-tools-drive-api.DRIVE#
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} params.filename - Nome do arquivo
+		 * @returns {Stream} Conteúdo do arquivo como um fluxo (Stream)
+		 */
+		getStream: {
+			description: "Return content as Stream",
+			params: {
+				filename: "string",
+			},
+			async handler(ctx) {
+				return await this.storage
+					.disk("s3")
+					.getStream(ctx.params.filename);
+			},
+		},
+		/**
+		 * Ação para deletar um arquivo. &lt;/br>
+		 * Ela recebe o nome do arquivo &lt;strong>filename&lt;/strong> e retorna um booleano indicando se o arquivo foi deletado ou não.
+		 * @summary Ação delete
+		 * @action delete
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {string} params.filename - Nome do arquivo
+		 * @returns {boolean} Retorna um booleano indicando se o arquivo foi deletado ou não
+		 * @memberof add-tools-drive-api.DRIVE#
+		 */
+		delete: {
+			description: "Delete file",
+			params: {
+				filename: "string",
+			},
+			async handler(ctx) {
+				return await this.storage
+					.disk("s3")
+					.delete(ctx.params.filename);
+			},
+		},
+	},
+	/**
+	 * @desc Possui um canal para escutar um evento e criar uma pasta no S3 quando uma corporação é criada &lt;/br>
+	 * &lt;strong>"corporation.created"&lt;/strong>
+	 * @summary channels
+	 * @memberof add-tools-drive-api.DRIVE#
+	 */
+	channels: {
+		"corporation.created": async function (payload) {
+			const ctx = payload?.ctx;
+			if (!ctx) {
+				throw new AddsonClientError(
+					"Context required",
+					400,
+					"ERR_HAS_NO_CONTEXT",
+				);
+			}
+			const filename = `${payload.corporation.CLIENT}/`.toUpperCase();
+			const fileContent = "";
+			const location = await this.actions.create(
+				{
+					filename,
+					fileContent,
+				},
+				{ parentCtx: ctx },
+			);
+		},
+	},
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:19-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

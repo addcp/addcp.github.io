@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-browser-api/src/services/GOVBR.service.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-browser-api/src/services/GOVBR.service.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">"use strict";
+const { chromium } = require('playwright');
+const request = require('request');
+const fs = require('fs');
+
+/**
+ * @desc O Serviço de GOVBR acessa páginas desse sistema para obter o conteúdo de arquivos
+ * @namespace add-tools-browser-api.GOVBR
+ * @memberof add-tools-browser-api
+ * @property {string} name - Nome do serviço, que obtém o nome do arquivo atual sem a extensão
+ * @property {object} settings - Configurações do serviço
+ * @property {object} actions - Ações do serviço: &lt;strong>getDocuments&lt;/strong>
+ * @todo property {object} methods - Métodos do serviço &lt;code>NomeDoMétodo()&lt;/code>
+ */
+module.exports = {
+	name: __filename.split('.')[0].split('/').pop(),
+	settings: {
+		IDAPP: `${/\add-\w*-\w*-api(?!.*\add-\w*-\w*-api)/.exec(__dirname)}`,
+	},
+	/**
+	 * @summary Actions do serviço
+	 * @property {object} getDocuments - Action getDocuments {@link add-tools-browser-api.GOVBR#getDocuments action getDocuments}
+	 * @memberof add-tools-browser-api.GOVBR#
+	 */
+	actions: {
+		/**
+		 * @desc Ação para baixar documentos de GOVBR &lt;/br>
+		 * @summary Ação getDocuments
+		 * @action getDocuments
+		 * @memberof add-tools-browser-api.GOVBR#
+		 * @property {string} rest - Rota da action
+		 * @property {string} description - Descrição da action
+		 * @property {object} params - Parâmetros da action
+		 * @property {string} params.REQ_XML - Parâmetro REQ_XML
+		 * @property {string} params.secretAlias - Parâmetro secretAlias
+		 * @property {boolean} cache - Cache da action
+		 * @returns {string} Retorna uma string como o conteúdo do arquivo envolvido com a tag &lt;strong>ListNFSe&lt;/strong>
+		 */
+		getDocuments: {
+			rest: '/',
+			description: "Baixa documentos de GOVBR",
+			params: {
+				REQ_XML: { type: "string" },
+				secretAlias: { type: "string" }
+			},
+			cache: false,
+			async handler(ctx) {
+				debugger
+				/**
+				 * 
+				 * 
+				 * esse serviço pode ser invocado para baixar notas fiscais de GOVBR
+				 * 
+				 * 
+				 */
+
+				const browser = await chromium.launch();
+				const context = await browser.newContext({ acceptDownloads: true });
+				const page = await context.newPage();
+
+				const DTINI = new Date(ctx.params.REQ_XML.match(/(?&lt;=DTINI>)(.*?)(?=&lt;\/DTINI>)/s)[0]);
+
+				const DTFIM = new Date(ctx.params.REQ_XML.match(/(?&lt;=DTFIM>)(.*?)(?=&lt;\/DTFIM>)/s)[0]);
+
+				const vault = await ctx.call("vault.retrieveSecret", {
+					secretType: "",
+					secretAlias: ctx.params.secretAlias,
+					addDecrypt: "X"
+				});
+
+				await context.route('https://www.nfse.gov.br/EmissorNacional/Certificado', (route, req) => {
+					const options = {
+						uri: req.url(),
+						method: req.method(),
+						headers: req.headers(),
+						body: req.postDataBuffer(),
+						timeout: 20000,
+						followRedirect: false,
+						agentOptions: {
+							pfx: Buffer.from(vault.data.pkcs12, 'base64'),
+							passphrase: Buffer.from(vault.data.pkcs12Password, 'base64').toString()
+						}
+					};
+
+					// Fire off the request manually (example is using using 'request' lib)
+					return request(options, function (err, resp, body) {
+						// Abort interceptedRequest on error
+						if (err) {
+							console.error(`Unable to call ${options.uri}`, err);
+							return route.abort('connectionrefused');
+						}
+
+						// Return retrieved response to interceptedRequest
+						route.fulfill({
+							status: resp.statusCode,
+							contentType: resp.headers['content-type'],
+							headers: resp.headers,
+							body: body
+						});
+					});
+				});
+
+				let docs = "";
+				await page.goto('https://www.nfse.gov.br/EmissorNacional');
+				await page.click('xpath=/html/body/section/div/div/div[2]/div[2]/div[2]/div/a');
+				await page.click('xpath=/html/body/section/div/div/div[2]/div[2]/div[2]/div/a');
+				console.log("LOGANDO NO SISTEMA");
+				await new Promise(resolve => setTimeout(resolve, 5000));
+				await page.click('xpath=/html/body/nav[1]/div/div[2]/ul/li[4]/a');
+				console.log("MENU NOTAS FISCAIS RECEBIDAS");
+				await new Promise(resolve => setTimeout(resolve, 5000));
+				const tbody = await page.$('xpath=/html/body/div[1]/table/tbody');
+				const rows = await tbody.$$('tr');
+				for (const row of rows) {
+					const cells = await row.$$('td');
+					const date = await cells[0].textContent();
+					const value = await cells[2].textContent();
+					await cells[5].click();
+					const a = await cells[5].$$('div div a');
+					const href = await a[1].getAttribute('href');
+					const [day, month, year] = date.trim().split('/');
+
+					const doc = {
+						date: new Date(`${year}-${month}-${day}`),
+						value: value.trim(),
+						link: href
+					}
+
+					// Verifique se a data de destino está entre a data de início e a data de término
+					if (doc.date >= DTINI &amp;&amp; doc.date &lt;= DTFIM) {
+						const [download] = await Promise.all([
+							page.waitForEvent('download'), // Aguardar o início do download
+							await page.click(`a[href="${href}"]`)
+						]);
+						await new Promise(resolve => setTimeout(resolve, 500));
+						console.log("BAIXANDO NOTAS");
+						const downloadedFilePath = await download.path();
+						let fileContent = fs.readFileSync(downloadedFilePath, 'utf-8');
+						fileContent = fileContent.replace("&lt;?xml version=\"1.0\" encoding=\"utf-8\"?>", "");
+						docs += `&lt;Nfse>${fileContent}&lt;/Nfse>`;
+						fs.unlinkSync(downloadedFilePath);
+					}
+				}
+				await browser.close();
+				return `&lt;ListNFSe>${docs}&lt;/ListNFSe>`;
+
+			}
+		},
+	},
+	methods: {},
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:18-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

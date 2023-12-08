@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-browser-api/src/services/BROWSER.service.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-browser-api/src/services/BROWSER.service.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">const puppeteer = require("puppeteer");
+const fs = require("fs");
+const { chromium, firefox, webkit } = require("playwright");
+const { XMLParser, XMLBuilder, XMLValidator } = require("fast-xml-parser");
+const bwipjs = require("bwip-js"); // Importe a biblioteca bwip-js
+const qr = require("qrcode"); // Importe a biblioteca qrcode
+const zlib = require("zlib");
+
+/**
+ * @desc O Serviço BROWSER é responsável por automatizar a navegação em um site via navegador&lt;/br>
+ * @namespace add-tools-browser-api.BROWSER
+ * @property {string} name - Nome do serviço
+ * @property {array} mixins - Usado para distribuir funcionalidades reutilizáveis para os serviços
+ * @property {object} metadata - Usado para armazenar qualquer metadados do serviço
+ * @property {string} metadata.$description - Descrição breve do serviço usada em listas automáticas
+ * @property {object} settings - Configurações internas do serviço
+ * @property {string} settings.IDAPP - ID do APP que pode ser usado em permissões
+ * @todo @property {boolean} settings.rest - Se estiver marcado, o serviço será acessível via REST
+ */
+module.exports = {
+	name: "BROWSER",
+	mixins: [],
+	metadata: { $description: "Browser Automation" },
+	settings: {
+		IDAPP: `${/\add-\w*-\w*-api(?!.*\add-\w*-\w*-api)/.exec(__dirname)}`,
+		rest: true,
+	},
+	/**
+	 * @summary Actions do serviço
+	 * @property {object} viewDacte - Gera a visualização DACTE {@link add-tools-browser-api.BROWSER#viewDacte action viewDacte}
+	 * @property {object} download - Efetua download de arquivos {@link add-tools-browser-api.BROWSER#download action download}
+	 * @property {object} urlToPdf - Converte uma página web em PDF {@link add-tools-browser-api.BROWSER#urlToPdf action urlToPdf}
+	 * @memberof add-tools-browser-api.BROWSER#
+	 */
+	actions: {
+		/**
+		 * Gera a visualização DACTE
+		 * A action viewDacte é responsável por gerar a visualização do Dacte. &lt;/br>
+		 * Esta função está no container Browser devido ao grande tamanho do contêiner 2000
+		 * @summary Ação viewDacte
+		 * @action viewDacte
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @property {string} rest - Rota da ação: "POST /"
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {object} params - Parâmetros da ação
+		 * @property {Object} params.doc - documento XML
+		 * @returns {string} pdfBase64String - Arquivo PDF em base64
+		 */
+		viewDacte: {
+			rest: "POST /",
+			description: "Dacte",
+			params: {
+				doc: { type: "object" },
+			},
+			async handler(ctx) {
+				debugger;
+
+				const document = await ctx.call("TAXD0002.find", {
+					query: {
+						TYPE: ".XML",
+						D0000: ctx.params.doc.id,
+					},
+				});
+
+				let xml = await ctx.call("TAXDATCHB.find", {
+					query: {
+						id: document[0].FILNR,
+					},
+				});
+
+				xml = zlib
+					.gunzipSync(new Buffer.from(xml[0].FILBIN, "base64"))
+					.toString("utf-8");
+
+				const browser = await chromium.launch();
+
+				const page = await browser.newPage();
+
+				// var xml = fs.readFileSync('./doc.xml', 'utf8');
+				xml = xml.replace(
+					/&lt;chave>(\d+)&lt;\/chave>/g,
+					'&lt;chave>"$1"&lt;/chave>',
+				);
+				xml = xml.replace(
+					/&lt;chCTe>(\d+)&lt;\/chCTe>/g,
+					'&lt;chCTe>"$1"&lt;/chCTe>',
+				);
+
+				const options = {
+					parseNodeValue: false,
+				};
+				const parser = new XMLParser(options);
+				const jObj = parser.parse(xml);
+
+				const { emit } = jObj.cteProc.CTe.infCte;
+				const { vPrest } = jObj.cteProc.CTe.infCte;
+				const { rem } = jObj.cteProc.CTe.infCte;
+				const { exped } = jObj.cteProc.CTe.infCte;
+				const recev = jObj.cteProc.CTe.infCte.receb;
+				const { dest } = jObj.cteProc.CTe.infCte;
+				const { ide } = jObj.cteProc.CTe.infCte;
+				const protCTe = jObj.cteProc.CTe.infCte.infCTeNorm;
+				const { imp } = jObj.cteProc.CTe.infCte;
+				const obs = jObj.cteProc.CTe.infCte.compl;
+				const infProt = jObj.cteProc.protCTe;
+
+				const barcodeData = infProt.infProt.chCTe
+					.replace('"', "")
+					.slice(0, -1);
+				const qrData = infProt.infProt.chCTe
+					.replace('"', "")
+					.slice(0, -1);
+				// let qrData = protCTe.infDoc.infNFe.chave.replace('"', "").slice(0, -1) || '';
+
+				let barcodeOptions = {
+					bcid: "code128",
+					text: barcodeData,
+					scale: 2,
+					height: 10,
+				};
+
+				const base64Image = await new Promise((resolve, reject) => {
+					bwipjs.toBuffer(barcodeOptions, (err, pngBuffer) => {
+						if (err) {
+							reject(err);
+						} else {
+							const base64String = pngBuffer.toString("base64");
+							resolve(base64String);
+						}
+					});
+				});
+
+				barcodeOptions = {
+					bcid: "qrcode", // Formato QR code
+					text: qrData,
+					scale: 3,
+				};
+
+				const base64QRCode = await new Promise((resolve, reject) => {
+					bwipjs.toBuffer(barcodeOptions, (err, pngBuffer) => {
+						if (err) {
+							reject(err);
+						} else {
+							const base64String = pngBuffer.toString("base64");
+							resolve(base64String);
+						}
+					});
+				});
+
+				let htmlContent = `
+			  &lt;!DOCTYPE html>
+			  &lt;html lang="en">
+			  &lt;head>
+				  &lt;meta charset="UTF-8">
+				  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0">
+				  &lt;title>Document&lt;/title>
+			  &lt;/head>
+			  &lt;body>
+				  &lt;div class="card">
+					  &lt;div class="hljs-container">
+						  &lt;br>
+						  &lt;style>
+							  body {
+								  font-size: 8px;
+							  }
+			  
+							  table,
+							  th,
+							  td {
+								  font-size: 8px;
+								  border-radius: 20px;
+								  border-collapse: collapse;
+							  }
+			  
+							  th,
+							  td {
+								  padding: 5px;
+								  text-align: left;
+								  border-radius: 20px;
+							  }
+						  &lt;/style>
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="4">
+										  &lt;center>DECLARO QUE RECEBI OS VOLUMES DESTE CONHECIMENTO EM PERFEITO ESTADO PELO QUE DOU POR
+											  CUMPRIDO O PRESENTE CONTRATO DE TRANSPORTE&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top" width="30%">NOME&lt;/td>
+									  &lt;td valign="top" rowspan="3">ASSINATURA / CARIMBO&lt;/td>
+									  &lt;td valign="top" rowspan="2">TÉRMINO DA PRESTAÇÃO - DATA/HORA&lt;br>&lt;br>&lt;br>INÍCIO DA PRESTAÇÃO -
+										  DATA/HORA&lt;br>&lt;br>&lt;br>&lt;/td>
+									  &lt;td valign="top" rowspan="2">
+										  &lt;center>&lt;br>&lt;b>CT-E&lt;/b>&lt;br>&lt;br>
+											  &lt;font style="font-size: 14px" face="Times New Roman">Nº 161702&lt;br>Série 2&lt;/font>
+										  &lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">RG&lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+						  &lt;hr>
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="2" rowspan="3">&lt;br>&lt;br>&lt;br>
+										  &lt;center>
+											  &lt;font style="font-size: 14px" face="Times New Roman">&lt;b>${
+													emit?.xNome
+												}&lt;/b>&lt;/font>&lt;br>${
+													emit?.enderEmit?.xLgr
+												},${emit?.enderEmit?.nro}&lt;br>${
+													emit?.enderEmit?.xBairro
+												} - ${
+													emit?.enderEmit?.cMun
+												} - ${
+													emit?.enderEmit?.xMun
+												} - ${
+													emit?.enderEmit?.UF
+												}&lt;br>Fone/Fax:
+										  &lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top" colspan="6">
+										  &lt;center>
+											  &lt;font style="font-size: 14px" face="Times New Roman">&lt;b>DACTE&lt;/b>&lt;/font>&lt;br>Documento
+											  Auxiliar do Conhecimento de Transporte Eletrônico
+										  &lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  &lt;center>MODAL&lt;br>
+											  &lt;font style="font-size: 14px" face="Times New Roman">&lt;b>Rodoviário&lt;/b>&lt;/font>
+										  &lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">
+										  &lt;center>MODELO&lt;br>&lt;b>${ide?.mod} &lt;/b>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  &lt;center>SÉRIE&lt;br>&lt;b>${ide?.serie}&lt;/b>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  &lt;center>NÚMERO&lt;br>&lt;b>${ide?.nCT}&lt;/b>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  &lt;center>FL&lt;br>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  &lt;center>DATA E HORA DE EMISSÃO&lt;br>&lt;b>${ide?.dhEmi}&lt;/b>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  &lt;center>
+										  SC.SUF.DO DEST&lt;br>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top" rowspan="5">&lt;img width="100px"
+											  src="data:image/png;base64,${base64QRCode}"
+											  alt="50170339115514000390570020001617021930128243" style="border: solid 1px black;">
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="6">
+										  &lt;center>&lt;img alt="50170339115514000390570020001617021930128243" width="300px" height="40px"
+												  src="data:image/png;base64,${base64Image}">
+										  &lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">
+										  &lt;center>TIPO DO CTE&lt;br>&lt;b>Normal&lt;/b>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  &lt;center>TIPO DO SERVIÇO&lt;br>&lt;b>Normal&lt;/b>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top" colspan="6">
+										  &lt;center>CHAVE DE ACESSO&lt;br>&lt;b>${infProt?.infProt?.chCTe
+												?.replace('"', "")
+												.slice(0, -1)}&lt;/b>&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">
+										  &lt;center>IND.DO CT-E GLOBALIZADO&lt;br>&lt;b>&lt;/b>&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">INF.DO CT-E GLOBALIZADO&lt;br>&lt;/td>
+									  &lt;td valign="top" colspan="6">
+										  &lt;center>Consulta em http://www.cte.fazenda.gov.br/portal&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="2">CFOP - NATUREZA DA PRESTAÇÃO&lt;br>&lt;b>${ide?.CFOP} -
+									  ${ide?.natOp}&lt;/b>&lt;/td>
+									  &lt;td valign="top" colspan="6">
+										  &lt;center>PROTOCOLO DE AUTORIZAÇÃO DE USO&lt;br>&lt;b>${infProt?.infProt?.nProt} - ${
+												infProt?.infProt?.dhRecbto
+											}&lt;/b>
+										  &lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top">INÍCIO DA PRESTAÇÃO&lt;br>&lt;b>${ide?.xMunIni} - ${
+											ide?.UFIni
+										}&lt;/b>&lt;/td>
+									  &lt;td valign="top">TÉRMINO DA PRESTAÇÃO&lt;br>&lt;b>${ide?.xMunFim} - ${
+											ide?.UFFim
+										}&lt;/b>&lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">
+										  REMETENTE: &lt;b>${rem?.xNome} &lt;/b>&lt;br>
+										  ENDEREÇO: &lt;b>${rem?.enderReme?.xLgr}, ${rem?.enderReme?.nro}, ${
+												rem?.enderReme?.xBairro
+											}&lt;/b>&lt;br>
+										  MUNICÍPIO: &lt;b>${rem?.enderReme?.xMun} - ${rem?.enderReme?.UF}&lt;/b> CEP: &lt;b>${
+												rem?.enderReme?.CEP
+											}&lt;/b>&lt;br>
+										  CNPJ/CPF: &lt;b>${rem?.CNPJ}&lt;/b> INSCRIÇÃO ESTADUAL: &lt;b>${rem?.IE}&lt;/b>&lt;br>
+										  PAÍS: &lt;b>${rem?.enderReme?.xPais}&lt;/b> FONE: &lt;b>${rem?.fone}&lt;/b>&lt;br>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  DESTINATÁRIO: &lt;b>${dest?.xNome}&lt;/b>&lt;br>
+										  ENDEREÇO: &lt;b>${dest?.enderDest?.xLgr}, ${dest?.enderDest?.nro}, ${
+												dest?.enderDest?.xBairro
+											}&lt;/b>&lt;br>
+										  MUNICÍPIO: &lt;b>${dest?.enderDest?.xMun} - ${dest?.enderDest?.UF}&lt;/b> CEP: &lt;b>${
+												dest?.enderDest?.CEP
+											}&lt;/b>&lt;br>
+										  CNPJ/CPF: &lt;b>${dest?.CNPJ}&lt;/b> INSCRIÇÃO ESTADUAL: &lt;b>${dest?.IE}&lt;/b>&lt;br>
+										  PAÍS: &lt;b>${dest?.enderDest?.xPais}&lt;/b> FONE: &lt;b>${dest?.fone}&lt;/b>&lt;br>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">
+										  EXPEDIDOR: &lt;b>${exped?.xNome}&lt;/b>&lt;br>
+										  ENDEREÇO: &lt;b>${exped?.enderExped?.xLgr}, ${exped?.enderExped?.nro}, ${
+												exped?.enderExped?.xBairro
+											}&lt;/b>&lt;br>
+										  MUNICÍPIO: &lt;b>${exped?.enderExped?.xMun} - ${
+												exped?.enderExped?.UF
+											}&lt;/b> CEP: &lt;b>${
+												exped?.enderExped?.CEP
+											}&lt;/b>&lt;br>
+										  CNPJ/CPF: &lt;b>${exped?.CNPJ}&lt;/b> INSCRIÇÃO ESTADUAL: &lt;b>${exped?.IE}&lt;/b>&lt;br>
+										  PAÍS: &lt;b>${exped?.enderExped?.xPais}&lt;/b> FONE: &lt;b>${exped?.fone}&lt;/b>&lt;br>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  RECEBEDOR: &lt;b>${recev?.xNome}&lt;/b>&lt;br>
+										  ENDEREÇO: &lt;b>${recev?.enderReceb?.xLgr}, ${recev?.enderReceb?.nro}, ${
+												recev?.enderReceb?.xBairro
+											}&lt;/b>&lt;br>
+										  MUNICÍPIO: &lt;b>${recev?.enderReceb?.xMun} - ${
+												recev?.enderReceb?.UF
+											}&lt;/b> CEP: &lt;b>${
+												recev?.enderReceb?.CEP
+											}&lt;/b>&lt;br>
+										  CNPJ/CPF: &lt;b>${recev?.CNPJ}&lt;/b> INSCRIÇÃO ESTADUAL: &lt;b>${recev?.IE}&lt;/b>&lt;br>
+										  PAÍS: &lt;b>${recev?.enderReceb?.xPais}&lt;/b> FONE: &lt;b>${recev?.fone}&lt;/b>&lt;br>
+									  &lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="5">
+			  
+			  
+			
+			  
+										  TOMADOR DO SERVIÇO &lt;b>${dest?.xNome}&lt;/b> MUNICÍPIO &lt;b>${
+												dest?.enderDest?.xMun
+											}&lt;/b>
+										  UF &lt;b>${dest?.enderDest?.UF}&lt;/b> CEP &lt;b>${dest?.enderDest?.CEP}&lt;/b>&lt;br>
+										  ENDEREÇO &lt;b>${dest?.enderDest?.xLgr}, ${dest?.enderDest?.nro},${
+												dest?.enderDest?.xBairro
+											}&lt;/b>&lt;br>
+										  CNPJ/CPF &lt;b>${dest?.CNPJ}&lt;/b> INSCRIÇÃO ESTADUAL &lt;b>${dest?.IE}&lt;/b> PAÍS &lt;b>${
+												dest?.enderDest?.xPais
+											}&lt;/b> FONE
+										  &lt;b>${dest?.fone}&lt;/b>&lt;br>
+			  
+			  
+			  
+			  
+			  
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="3">PRODUTO PREDOMINANTE&lt;br>&lt;b>${
+											protCTe?.infCarga?.proPred
+										}&lt;/b>&lt;/td>
+									  &lt;td valign="top">OUTRAS CARACTERÍSTICAS DA CARGA&lt;br>&lt;/td>
+									  &lt;td valign="top">VALOR TOTAL DA CARGA&lt;br>&lt;b>${
+											protCTe?.infCarga?.vCarga
+												? protCTe?.infCarga?.vCarga.toLocaleString(
+														"pt-BR",
+														{
+															style: "currency",
+															currency: "BRL",
+														},
+												  )
+												: ""
+										}&lt;/b>&lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">TP MED /UN. MED&lt;br>&lt;b>&lt;/b>&lt;/td>
+									  &lt;td valign="top">TP MED /UN. MED&lt;br>&lt;b>&lt;/b>&lt;/td>
+									  &lt;td valign="top">TP MED /UN. MED&lt;br>&lt;b>PESO BRUTO&lt;br>${
+											protCTe?.infCarga?.infQ[0]?.qCarga
+										}&lt;/b>&lt;/td>
+									  &lt;td valign="top">TP MED /UN. MED&lt;br>&lt;b>&lt;/b>&lt;/td>
+									  &lt;td valign="top">TP MED /UN. MED&lt;br>&lt;b>&lt;/b>&lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="4">
+										  &lt;center>COMPONENTES DO VALOR DA PRESTAÇÃO DO SERVIÇO&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top" rowspan="2" width="25%">NOME | VALOR&lt;br>Tarifa | ${
+											vPrest?.Comp?.vComp
+										}&lt;br>AdValorem | ${
+											vPrest?.Comp?.vComp
+										}&lt;br>
+									  &lt;/td>
+									  &lt;td valign="top" rowspan="2" width="25%">NOME | VALOR&lt;br>&lt;/td>
+									  &lt;td valign="top" rowspan="2" width="25%">NOME | VALOR&lt;br>&lt;/td>
+									  &lt;td valign="top" width="25%">VALOR TOTAL DO SERVIÇO&lt;br>&lt;b>${
+											vPrest?.vTPrest
+												? vPrest?.vTPrest.toLocaleString(
+														"pt-BR",
+														{
+															style: "currency",
+															currency: "BRL",
+														},
+												  )
+												: ""
+										}&lt;/b>&lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">VALOR A RECEBER&lt;br>&lt;b>${
+											vPrest?.vRec
+												? vPrest?.vRec.toLocaleString(
+														"pt-BR",
+														{
+															style: "currency",
+															currency: "BRL",
+														},
+												  )
+												: ""
+										}&lt;/b>&lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="6">
+										  &lt;center>INFORMAÇÕES RELATIVAS AO IMPOSTO&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">SITUAÇÃO TRIBUTÁRIA&lt;br>&lt;b>60&lt;/b>&lt;/td>
+									  &lt;td valign="top">BASE DE CALCULO&lt;br>&lt;b>${
+											imp?.ICMS?.ICMS00?.vBC
+												? imp?.ICMS?.ICMS00?.vBC.toLocaleString(
+														"pt-BR",
+														{
+															style: "currency",
+															currency: "BRL",
+														},
+												  )
+												: ""
+										}&lt;/b>&lt;/td>
+									  &lt;td valign="top">ALÍQ ICMS&lt;br>&lt;b>${imp?.ICMS?.ICMS00?.pICMS}&lt;/b>&lt;/td>
+									  &lt;td valign="top">VALOR ICMS&lt;br>&lt;/td>
+									  &lt;td valign="top">% RED. BC ICMS&lt;br>&lt;/td>
+									  &lt;td valign="top">VALOR ICMS ST&lt;br>&lt;b>${
+											imp?.ICMS?.ICMS00?.vICMS
+												? imp?.ICMS?.ICMS00?.vICMS.toLocaleString(
+														"pt-BR",
+														{
+															style: "currency",
+															currency: "BRL",
+														},
+												  )
+												: ""
+										}&lt;/b>&lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top">
+										  &lt;center>DOCUMENTOS ORIGINÁRIOS&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">TIPO DOC - CNPJ/CHAVE/OBS - SÉRIE/NRO. DOCUMENTO&lt;br>&lt;br> NF-e -
+									  ${
+											infProt?.infProt?.chCTe
+												? infProt?.infProt?.chCTe
+														.replace('"', "")
+														.slice(0, -1)
+												: ""
+										} - ${
+											infProt?.infProt?.chCTe
+												? infProt?.infProt?.chCTe
+														.replace('"', "")
+														.slice(0, -1)
+														.substr(22, 3)
+												: ""
+										} /${
+											infProt?.infProt?.chCTe
+												? infProt?.infProt?.chCTe
+														.replace('"', "")
+														.slice(0, -1)
+														.substr(25, 9)
+												: ""
+										} | &lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top">
+										  &lt;center>OBSERVAÇÕES GERAIS&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">${obs?.xObs}&lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top" colspan="2">
+										  &lt;center>DADOS ESPECÍFICOS DO MODAL RODOVIÁRIO&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">RNTRC DA EMPRESA&lt;br>&lt;b>&lt;/b>&lt;/td>
+									  &lt;td valign="top">ESTE CONHECIMENTO DE TRANSPORTE ATENDE À LEGISLAÇÃO DE TRANSPORTE RODOVIÁRIO EM
+										  VIGOR&lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+						  &lt;/table>
+			  
+			  
+			  
+						  &lt;table border="1" width="100%">
+							  &lt;tbody>
+								  &lt;tr>
+									  &lt;td valign="top">
+										  &lt;center>USO EXCLUSIVO DO EMISSOR DO CT-E&lt;/center>
+									  &lt;/td>
+									  &lt;td valign="top">
+										  &lt;center>RESERVADO AO FISCO&lt;/center>
+									  &lt;/td>
+								  &lt;/tr>
+								  &lt;tr>
+									  &lt;td valign="top">${obs?.xObs}&lt;/td>
+									  &lt;td valign="top" width="30%">&lt;/td>
+								  &lt;/tr>
+							  &lt;/tbody>
+			  
+			  
+			  
+			  
+					  &lt;/div>
+				  &lt;/div>
+			  &lt;/body>
+			  
+			  &lt;/html>
+			  `;
+
+				htmlContent = htmlContent.replace(/undefined/g, "  ");
+
+				await page.goto("about:blank");
+
+				await page.setContent(htmlContent);
+
+				const pdfBuffer = await page.pdf({ format: "A4" });
+				const pdfBase64String = pdfBuffer.toString("base64");
+
+				await browser.close();
+				return pdfBase64String;
+			},
+		},
+		/**
+		 * Efetua download de arquivos
+		 * @summary Ação download
+		 * @action download
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @property {string} rest - Rota da ação: "POST /"
+		 * @property {string} description - Descrição breve da ação usada em listas automáticas
+		 * @property {function} permissions - Permissões da action
+		 * @property {object} params - Parâmetros da ação
+		 * @todo @property {string} params.url - url a ser processada
+		 * @property {String} [params.responseType="BASE64"] - Tipo de resposta, um enum que pode ter as seguintes opções: &lt;/br>
+		 * &lt;strong>"PDF"&lt;/strong> - Exibe o retorno como arquivo PDF &lt;/br>
+		 * &lt;strong>"GIF"&lt;/strong> - Exibe o retorno como arquivo GIF &lt;/br>
+		 * &lt;strong>"XML"&lt;/strong> - Exibe o retorno como arquivo XML &lt;/br>
+		 * &lt;strong>"BASE64"&lt;/strong> - Exibe o retorno como Base64 &lt;/br>
+		 * @property {String} [params.browser="firefox"] - Navegador a ser utilizado, um enum que pode ter as seguintes opções: &lt;/br>
+		 * &lt;strong>"chromium"&lt;/strong> - Usa o Chromium como Engine &lt;/br>
+		 * &lt;strong>"firefox"&lt;/strong> - Usa o Firefox como engine &lt;/br>
+		 * &lt;strong>"webkit"&lt;/strong> - Usa o webkit como engine &lt;/br>
+		 * @property {Boolean} [params.visible] - Exibe o navegador durante o processamento
+		 * @property {Array} params.steps - Um array de objetos no qual cada item do array é um objeto que representa uma etapa específica no processo.
+		 * @property {Object} params.steps.items  - Objeto que representa uma etapa específica no processo.
+		 * @property {Object} params.steps.items.props  - Propriedades do objeto que representa uma etapa específica no processo.
+		 * @property {String} params.steps.items.props.type - Tipo de passo a ser realizado, um enum que pode ter as seguintes opções: &lt;/br>
+		 * &lt;strong>"URL"&lt;/strong> - Navega para uma URL &lt;/br>
+		 * &lt;strong>"LINK"&lt;/strong> - Download de Link direto para arquivo &lt;/br>
+		 * &lt;strong>"CLICK"&lt;/strong> - Clica em um elemento da página &lt;/br>
+		 * &lt;strong>"CLICKDOWNLOAD"&lt;/strong> - Clica em um seletor e faz Download &lt;/br>
+		 * &lt;strong>"AWAITDOWNLOAD"&lt;/strong> - Clica em um seletor e faz Download &lt;/br>
+		 * &lt;strong>"POPUP"&lt;/strong> - Aguarda popup e faz download baseado em seletor &lt;/br>
+		 * &lt;strong>"IMG"&lt;/strong> - Download de imagem incorporada em uma página &lt;/br>
+		 * &lt;strong>"PORTO"&lt;/strong> - Caminho personalizado &lt;/br>
+		 * &lt;strong>"PDF"&lt;/strong> - Gera PDF da URL &lt;/br>
+		 * &lt;strong>"CONTENT"&lt;/strong> - Retorna o conteúdo da página &lt;/br>
+		 * @property {String} [params.steps.items.props.value] - Valor do passo a ser executado. &lt;strong>Nota&lt;/strong>: este campo é opcional, mas se presente, não pode ser uma string vazia.
+		 * @returns {String|Object} - Se uma das ações que definem o retorno for realizada, a função retornará o resultado dessa ação. Caso contrário, retornará a string "Solicitação recebida".
+		 */
+		download: {
+			rest: "POST /",
+			description: "Download Link",
+			permissions: () => true,
+			params: {
+				// url: {type: "url"},
+				responseType: {
+					type: "string",
+					default: "BASE64",
+					optional: true,
+					enum: [
+						"PDF", // Exibe o retorno como arquivo PDF
+						"GIF", // Exibe o retorno como arquivo GIF
+						"XML", // Exibe o retorno como arquivo XML
+						"BASE64", // Exibe o retorno como Base64
+					],
+				},
+				browser: {
+					type: "string",
+					default: "firefox",
+					optional: true,
+					enum: [
+						"chromium", // Usa o Chromium como Engine
+						"firefox", // Usa o Firefox como engine
+						"webkit", // Usa o webkit como engine
+					],
+				},
+				visible: "boolean|optional",
+				steps: {
+					type: "array",
+					items: {
+						type: "object",
+						props: {
+							type: {
+								type: "string",
+								enum: [
+									"URL", // Navega para uma URL
+									"LINK", // Download de Link direto para arquivo
+									"CLICK", // Clica em um elemento da página
+									"CLICKDOWNLOAD", // Clica em um seletor e faz Download
+									"AWAITDOWNLOAD", // Clica em um seletor e faz Download
+									"POPUP", // Aguarda popup e faz download baseado em seletor
+									"IMG", // Download de imagem incorporada em uma página
+									"PORTO", // Caminho personalizado
+									"PDF", // Gera PDF da URL
+									"CONTENT", // Retorna o conteúdo da página
+								],
+							},
+							value: {
+								type: "string",
+								empty: false,
+								optional: true,
+							},
+						},
+					},
+				},
+			},
+			async handler(ctx) {
+				let retorno;
+				const { page, browser } = await this.createPage(ctx);
+
+				const { steps } = ctx.params;
+
+				for (const step of steps) {
+					switch (step.type) {
+						// Navega para uma URL
+						case "URL":
+							const url = step.value;
+							await this.goToUrl(page, url);
+							break;
+
+						// Download de Link direto para arquivo
+						case "LINK":
+							const urlFile = step.value;
+							retorno = await this.link(ctx, urlFile);
+							break;
+
+						// Clica em um elemento da página
+						case "CLICK":
+							const selector = step.value;
+							await this.click(page, selector);
+							break;
+
+						// Navega para uma URL, clica e aguarda o Download
+						case "CLICKDOWNLOAD":
+							const downSelector = step.value;
+							retorno = await this.clickDownload(
+								ctx,
+								page,
+								downSelector,
+							);
+							break;
+
+						// Navega para uma URL, e aguarda o Download
+						case "AWAITDOWNLOAD":
+							retorno = await this.awaitDownload(ctx, page);
+							break;
+
+						// Aguarda popup e faz download baseado em seletor
+						case "POPUP":
+							const popupSelector = step.value;
+							retorno = await this.popup(
+								ctx,
+								page,
+								popupSelector,
+							);
+							break;
+
+						// Download de imagem incorporada em uma página
+						case "IMG":
+							const imgSelector = step.value;
+							retorno = await this.img(ctx, page, imgSelector);
+							break;
+
+						// Gera PDF da URL
+						case "PDF":
+							const pdfUrl = step.value || "";
+							retorno = await this.pdf(ctx, page, pdfUrl);
+							break;
+
+						// Retorna o conteúdo da página
+						case "CONTENT":
+							retorno = await this.content(ctx, page);
+							break;
+
+						// Caminho personalizado
+						case "PORTO":
+							await page.goto(
+								"https://nfe.portoalegre.rs.gov.br/nfse/pages/consultaNFS-e_cidadao.jsf",
+							);
+							await page
+								.locator('input[name="form\\:cnpjPrestador"]')
+								.fill("18410549000110");
+							await page
+								.locator('input[name="form\\:numeroNfsE"]')
+								.fill("202000000000305");
+							await page
+								.locator('input[name="form\\:codVerif"]')
+								.fill("fe07a9a8");
+							await page
+								.locator(
+									'input[name="form\\:bt_procurar_NFS-e"]',
+								)
+								.click();
+							break;
+
+						default:
+							break;
+					}
+				}
+				await browser.close();
+				return retorno || "Solicitação recebida";
+			},
+			openapi: {
+				responses: {
+					200: {
+						description: "Download solicitado com sucesso",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+								},
+							},
+						},
+					},
+				},
+				requestBody: {
+					content: {
+						"application/json": {
+							examples: {
+								Ginfes: {
+									summary: "GINFES",
+									value: {
+										responseType: "BASE64",
+										steps: [
+											{
+												type: "URL",
+												value: "http://jundiai.ginfes.com.br/birt/frameset?__report=nfs_jundiai.rptdesign&amp;cdVerificacao=628305267&amp;numNota=24522",
+											},
+											{
+												type: "CLICKDOWNLOAD",
+												value: "text=Exportar PDF",
+											},
+										],
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		/**
+		 * A action urlToPdf converte uma URL em um PDF, criando um PDF da página web aberta, com certas configurações de margem e formato.  &lt;/br>
+		 * Ela verifica se o parâmetro urlBase64 foi fornecido. Se sim, ele decodifica a URL que foi codificada em base64. Caso contrário, usa a URL fornecida diretamente.
+		 * @summary Ação urlToPdf
+		 * @action urlToPdf
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @property {String} rest - Rota da ação: "POST /urlToPdf"
+		 * @property {String} description - Descrição breve da ação usada em listas automáticas
+		 * @property {Object} params - Parâmetros da ação
+		 * @property {String} [params.url] - URL a ser processada
+		 * @property {string} [params.urlBase64] - URL a ser processada em Base64
+		 * @returns Retorna o PDF criado.
+		 * @throws Se ocorrer algum erro durante esse processo, ele será registrado no console.
+		 */
+		urlToPdf: {
+			rest: "POST /urlToPdf",
+			description: "Convert URL to PDF",
+			params: {
+				url: { type: "url", optional: true },
+				urlBase64: { type: "string", optional: true },
+			},
+			async handler(ctx) {
+				try {
+					let { url } = ctx.params;
+					if (ctx.params.urlBase64) {
+						const { urlBase64 } = ctx.params;
+						url = await ctx.call("base64.decode", {
+							string: urlBase64,
+						});
+					}
+					const span = ctx.startSpan("Inicialização do Browser");
+					const browser = await puppeteer.launch({
+						headless: true,
+					});
+					const webPage = await browser.newPage();
+					await webPage.goto(url, {
+						waitUntil: "networkidle0",
+					});
+					ctx.finishSpan(span);
+
+					const spanPDF = ctx.startSpan("Criação do PDF");
+					const pdf = await webPage.pdf({
+						printBackground: false,
+						format: "A4",
+						margin: {
+							top: "20px",
+							bottom: "40px",
+							left: "20px",
+							right: "20px",
+						},
+					});
+					await browser.close();
+					ctx.finishSpan(spanPDF);
+
+					ctx.meta.$responseType = "application/pdf";
+					ctx.meta.$responseHeaders = {
+						"Content-Disposition": `attachment; filename="page.pdf"`,
+					};
+					return pdf;
+				} catch (error) {
+					console.log(error.message);
+				}
+			},
+			openapi: {
+				responses: {
+					200: {
+						description: "PDF criado com sucesso",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	methods: {
+		/**
+		 * O method createPage inicia o navegador com o motor selecionado, cria um novo contexto de navegador com configurações específicas (aceitar downloads e ignorar erros HTTPS) e cria uma nova página nesse contexto.
+		 * @summary Método createPage
+		 * @method createPage
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contexto da requisição 
+		 * @param {boolean} ctx.params.visible - Exibe o navegador durante o processamento
+		 * @param {string} ctx.params.browser - Navegador a ser utilizado, um enum que pode ter as seguintes opções: &lt;/br>
+		 * &lt;strong>"chromium"&lt;/strong> - Usa o Chromium como Engine &lt;/br>
+		 * &lt;strong>"firefox"&lt;/strong> - Usa o Firefox como engine &lt;/br>
+		 * &lt;strong>"webkit"&lt;/strong> - Usa o webkit como engine &lt;/br>
+		 * @returns {object} - Retorna um objeto contendo a página criada e o navegador iniciado.
+		 */
+		async createPage(ctx) {
+			const headless = ctx.params.visible;
+			// ||
+			// !!ctx.params.steps.find((step) => step.type === "POPUP")
+			// 	? false
+			// 	: true;
+			let engine;
+			switch (ctx.params.browser) {
+				case "chromium":
+					engine = chromium;
+					break;
+
+				case "firefox":
+					engine = firefox;
+					break;
+
+				case "webkit":
+					engine = webkit;
+					break;
+
+				default:
+					break;
+			}
+
+			const browser = await engine.launch({
+				headless,
+				timeout: 90000,
+			}); // Or 'firefox' or 'webkit'.
+			const context = await browser.newContext({
+				acceptDownloads: true,
+				ignoreHTTPSErrors: true,
+			});
+
+			const page = await context.newPage();
+			return { page, browser };
+		},
+		/**
+		 * O method goToUrl navega para uma URL específica em uma página de navegador e espera até que um elemento com o ID "Form1" esteja anexado ao DOM.
+		 * @summary método goToUrl
+		 * @method goToUrl
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} page - Página do navegador, representa uma única guia ou janela de navegador
+		 * @param {string} url - URL para a qual a página deve navegar
+		 */
+		async goToUrl(page, url) {
+			await page.goto(url);
+			await page.waitForSelector("#Form1", { state: "attached" });
+		},
+		/**
+		 * O method link faz uma solicitação HTTP GET para uma URL específica e retorna os dados da resposta. &lt;/br>
+		 * @summary método link
+		 * @method link
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contém os parâmetros da solicitação e métodos para interagir com o serviço.
+		 * @param {string} url - URL para a qual a solicitação HTTP GET deve ser feita.
+		 * @returns {Promise} - Retorna uma Promise que resolve para uma string base64 ou um buffer, dependendo do parâmetro responseType.
+		 * @throws Se ocorrer algum erro durante esse processo, ele será registrado no console.
+		 */
+		async link(ctx, url) {
+			const response = await ctx
+				.call("HTTP.get", {
+					url,
+					opt: {
+						responseType: "buffer",
+					},
+				})
+				.catch((err) => console.log(err));
+
+			const data = Buffer.from(response.body.data, "binary");
+			return ctx.params.responseType === "BASE64"
+				? await this.returnBase64(data)
+				: await this.returnBin(ctx, data);
+			// const filePath = `${__dirname}/${filename}`;
+			// await new Promise((resolve) => {
+			// const writeStream = fs.createWriteStream(filePath);
+			// response.data.pipe(writeStream);
+			// writeStream.on("finish", resolve);
+			// });
+		},
+		/**
+		 * O method click executa a ação de um click em um seletor da página
+		 * @summary método click
+		 * @method click
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} page - Página do navegador, representa uma única guia ou janela de navegador
+		 * @param {string} selector - Seletor do elemento a ser clicado
+		 */
+		async click(page, selector) {
+			const locator = await page.locator(selector);
+			await locator.click();
+		},
+		/**
+		 * @desc O method clickDownload efetua a ação de clique e aguarda pelo evento de download
+		 * @summary Método para efetuar download
+		 * @method clickDownload
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contexto da requisição
+		 * @param {object} page - Página do navegador
+		 * @param {string} selector - Seletor do elemento a ser clicado
+		 */
+		async clickDownload(ctx, page, selector) {
+			const locator = await page.locator(selector);
+
+			try {
+				const [download] = await Promise.all([
+					page.waitForEvent("download"), // wait for download to start
+					await locator.click(),
+				]);
+
+				const data = fs.readFileSync(await download.path());
+
+				return ctx.params.responseType === "BASE64"
+					? await this.returnBase64(data)
+					: await this.returnBin(ctx, data);
+			} catch (error) {
+				console.log(error);
+			}
+		},
+		/**
+		 * @desc O method awaitDownload aguarda por um evento direto de download
+		 * @summary Método para download direto
+		 * @method awaitDownload
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contexto da requisição
+		 * @param {object} page - Página do navegador
+		 */
+		async awaitDownload(ctx, page) {
+			try {
+				const [download] = await Promise.all([
+					page.waitForEvent("download"), // wait for download to start
+				]);
+
+				const data = fs.readFileSync(await download.path());
+
+				return ctx.params.responseType === "BASE64"
+					? await this.returnBase64(data)
+					: await this.returnBin(ctx, data);
+			} catch (error) {
+				console.log(error);
+			}
+		},
+		/**
+		 * @desc O method popup aguarda um popup ser aberto e faz o download do arquivo baseado no seletor informado
+		 * @summary Método para tratar popups
+		 * @method popup
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contexto da requisição
+		 * @param {object} page - Página do navegador
+		 * @param {string} selector - Seletor do elemento a ser clicado
+		 */
+		async popup(ctx, page, selector) {
+			await new Promise((resolve) => {
+				page.on("popup", async (popup) => {
+					await popup.waitForLoadState();
+					await popup.title();
+
+					const locator = await popup.locator(selector);
+
+					try {
+						const response = await ctx
+							.call("HTTP.get", {
+								url: locator._frame._url,
+								opt: {
+									responseType: "buffer",
+								},
+							})
+							.catch((err) => console.log(err));
+
+						const base64 = Buffer.from(response, "binary").toString(
+							"base64",
+						);
+
+						// const base64 = Buffer.from(
+						// 	response.data,
+						// 	"binary"
+						// ).toString("base64");
+
+						return base64;
+					} catch {
+					} finally {
+					}
+				});
+			});
+		},
+		/**
+		 * @desc O method &lt;code>img()&lt;/code> faz o download de uma imagem via http
+		 * @summary Método para download de imagem
+		 * @function img
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contexto da requisição
+		 * @param {object} page - Página do navegador
+		 * @param {string} selector - Seletor do elemento a ser clicado
+		 */
+		async img(ctx, page, selector) {
+			const locator = await page.locator(selector);
+
+			// const response = await axios.get(locator._frame._url, {
+			// 	responseType: "arraybuffer",
+			// });
+
+			const response = await ctx
+				.call("HTTP.get", {
+					url: locator._frame._url,
+					opt: {
+						responseType: "buffer",
+					},
+				})
+				.catch((err) => console.log(err));
+
+			const data = Buffer.from(response.body.data, "binary");
+			return ctx.params.responseType === "BASE64"
+				? await this.returnBase64(data)
+				: await this.returnBin(ctx, data);
+
+			// const base64 = Buffer.from(response.body.data, "binary").toString(
+			// 	"base64"
+			// );
+
+			// let base64;
+			// base64 = Buffer.from(response.data, "binary").toString("base64");
+
+			// return base64;
+		},
+		/**
+		 * @desc O method &lt;code>pdf()&lt;/code> retorna o conteúdo da página em formato PDF
+		 * @summary Método para conversão em formato PDF
+		 * @method pdf
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contexto da requisição
+		 * @param {object} page - Página do navegador
+		 * @param {string} url - URL a ser processada
+		 */
+		async pdf(ctx, page, url) {
+			if (url) {
+				await this.goToUrl(page, url);
+			}
+			const data = await page.pdf({
+				printBackground: true,
+				format: "A4",
+				margin: { top: "5mm", left: "4mm", right: "4mm" },
+			});
+
+			return ctx.params.responseType === "BASE64"
+				? await this.returnBase64(data)
+				: await this.returnBin(ctx, data);
+		},
+		/**
+		 * @desc O method &lt;code>content()&lt;/code> retorna o conteúdo da página
+		 * @summary Método para retornar o conteúdo da página
+		 * @method content
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contexto da requisição
+		 * @param {object} page - Página do navegador
+		 */
+		async content(ctx, page) {
+			const data = Buffer.from(await page.content(), "utf-8");
+
+			return ctx.params.responseType === "BASE64"
+				? await this.returnBase64(data)
+				: await this.returnBin(ctx, data);
+		},
+		/**
+		 * @desc O method &lt;code>returnBin()&lt;/code> retorna um arquivo binário
+		 * @summary Método para retornar um arquivo binário
+		 * @method returnBin
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} ctx - Contexto da requisição
+		 * @param {object} data - Dados a serem processados
+		 */
+		async returnBin(ctx, data) {
+			switch (ctx.params.responseType) {
+				case "PDF":
+					ctx.meta.$responseType = "application/pdf";
+					ctx.meta.$responseHeaders = {
+						"Content-Disposition": `attachment; filename="page.pdf"`,
+					};
+					break;
+
+				case "GIF":
+					ctx.meta.$responseType = "image/gif";
+					ctx.meta.$responseHeaders = {
+						"Content-Disposition": `attachment; filename="page.gif"`,
+					};
+					break;
+
+				case "XML":
+					ctx.meta.$responseType = "application/xml";
+					ctx.meta.$responseHeaders = {
+						"Content-Disposition": `attachment; filename="page.xml"`,
+					};
+					break;
+
+				default:
+					break;
+			}
+
+			return data;
+		},
+		/**
+		 * @desc O method &lt;code>returnBase64()&lt;/code> converte o conteúdo para base64
+		 * @summary Método para encode base64
+		 * @method returnBase64
+		 * @memberof add-tools-browser-api.BROWSER#
+		 * @param {object} data - Dados a serem processados
+		 */
+		async returnBase64(data) {
+			const base64 = data.toString("base64");
+			return base64;
+		},
+	},
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:18-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

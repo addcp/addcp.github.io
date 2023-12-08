@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-drive-api/src/services/test/unit/DRIVE.service.spec.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-drive-api/src/services/test/unit/DRIVE.service.spec.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">"use strict";
+const { ServiceBroker } = require("moleculer");
+const service = require("../../DRIVE.service");
+const { ValidationError } = require("moleculer").Errors;
+const StorageManager = require('../../node_modules/storage/StorageManager');
+
+
+
+/**
+ * Testes para os serviços contidos em &lt;strong>add-tools-ocr-api&lt;/strong>
+ * @namespace add-tools-drive-api.Testes
+ */
+
+/**
+ * Este arquivo contém os testes para o serviço OCR
+ * @namespace add-tools-drive-api.Testes.DRIVE
+ */
+
+/**
+ * Bloco de testes do Serviço DRIVE
+ */
+describe("Testando serviço 'DRIVE'", () => {
+    let broker;
+    let mockDisk;
+    let mockCreate;
+
+    beforeAll(() => {
+        broker = new ServiceBroker({ logger: false });
+        broker.createService(service);
+
+        return broker.start();
+    });
+
+	beforeEach(() => {  
+		// Limpa o mock para não interferir nos testes
+		jest.clearAllMocks();
+    });
+
+    afterAll(() => {
+        return broker.stop();
+    });
+
+	/**
+	 * @desc Teste para verificar se a descrição do serviço está preenchida. &lt;/br>
+	 * O serviço DRIVE deve ter uma descrição breve em sua metadata, que aceita qualquer valor do tipo string.
+	 * @summary Descrição do serviço
+	 * @test Descrição_Serviço
+	 * @memberof add-tools-drive-api.Testes.DRIVE#
+	 */
+	test("Deveria ter uma descrição breve em cada serviço com qualquer valor do tipo String", () => {
+		expect(service?.metadata?.$description).toEqual(expect.any(String));
+	});
+
+	/**
+	 * @desc Teste para verificar se nas configurações do serviço DRIVE existe um código IDAPP. &lt;/br>
+	 * O serviço DRIVE deve ter um código IDAPP nas suas configurações definido.
+	 * @summary IDAPP do Serviço
+	 * @test IDAPP_Serviço
+	 * @memberof add-tools-drive-api.Testes.DRIVE#
+	 */
+	test("Deveria ter um código IDAPP nas configurações de cada serviço", function () {
+		expect(service?.settings?.IDAPP).toBeDefined();
+	});
+
+	/**
+	 * Bloco de testes de todas as actions do Serviço DRIVE
+	 */
+	describe("Testando todas as actions do serviço 'DRIVE'", () => {
+		/**
+		 * @desc Teste para verificar se a descrição das actions está preenchida. &lt;/br>
+		 * Todas as actions do serviço DRIVE deve ter uma descrição breve, que aceita qualquer valor do tipo string.
+		 * @summary Descrição das actions
+		 * @test Descrição_Action
+		 * @memberof add-tools-drive-api.Testes.DRIVE#
+		 */
+		test("Deveria ter uma descrição breve em cada ação", function () {
+			Object.values(service?.actions).forEach((action) => {
+				expect(action.description).toEqual(expect.any(String));
+			});
+		});
+		/**
+		 * @desc Teste para verificar o parâmetro filename de todas as actions&lt;/br>
+		 * Todas as actions do serviço DRIVE deve ter o parâmetro filename, que não pode ser opcional e deve ser do tipo string.
+		 * @summary Parâmetro filename
+		 * @test Parâmetro_Filename
+		 * @memberof add-tools-drive-api.Testes.DRIVE#
+		 */
+		test('Deveria ter o parâmetro não opcional filename do tipo string em cada ação', () => {
+			Object.values(service?.actions).forEach((action) => {
+				expect(action.params.filename).toBeDefined();
+				expect(action.params.filename).toBe("string");
+				expect(action.params.filename).not.toBe("optional");
+			});
+		});
+
+		/**
+		 * @desc Teste para verificar exceção de validação ao enviar parâmetros inválidos. &lt;/br>
+		 * Todas as actions do serviço DRIVE devem lançar uma exceção de validação quando enviado o parâmetro filename de tipo diferente de string (number).
+		 * @summary Tipo de parâmetro inválido
+		 * @test Parâmetro_Inválido
+		 * @memberof add-tools-drive-api.Testes.DRIVE#
+		 */
+		test("Deveria lançar uma exceção de validação quando o filename for do tipo number", async function () {
+			const actions = ['create', 'getBase64', 'exists', 'getStat', 'getContent', 'getStream', 'delete'];
+
+			actions.forEach(async (action) => {
+				let resultado = null;
+				try {
+					resultado = await broker.call(`DRIVE.${action}`, {
+						filename: 2,
+					});
+				} catch (error) {
+					resultado = error;
+				}
+				expect(resultado).toBeInstanceOf(ValidationError);
+			});
+		});
+
+
+		/**
+		 * Bloco de testes para a action 'create' do Serviço DRIVE 
+		 */
+		describe("Testando action 'create", () => {
+			/**
+			 * @desc Teste para verificar a chamada da função 'this.storage'. &lt;/br>
+			 * A action create do serviço DRIVE deve chamar a função 'this.storage' com os parâmetros corretos e na ordem correta.
+			 * @summary Chamada da função this.storage
+			 * @test Chamada_thisStorage
+			 * @memberof add-tools-drive-api.Testes.DRIVE#
+			 */
+			test("Action 'create' deve chamar 'this.storage' com os parâmetros corretos e na ordem correta", async () => {
+
+				// Configuração do mock da função create que recebe o nome do arquivo e o conteúdo do arquivo
+				mockCreate = jest.fn();
+				mockStream = jest.fn();
+				// Configuração do mock da função disk que recebe o nome do disco e chama a função create
+				mockDisk = jest.fn(() => ({
+					create: mockCreate,
+					getStream: mockStream
+				}));
+
+				// Substitui a função chamada 'disk' que faz parte da classe StorageManager pelo mockDisk
+				StorageManager.prototype.disk = mockDisk;
+
+
+				await broker.call("DRIVE.create", {
+					filename: 'testFile.txt', fileContent: 'Conteúdo do arquivo testFile.txt'
+				});
+				expect(mockDisk).toHaveBeenCalledWith('s3');
+				expect(mockDisk).toHaveBeenCalledTimes(1);
+
+				expect(mockCreate).toHaveBeenCalledWith((expect.any(String)), (expect.any(String)));
+				expect(mockCreate).toHaveBeenCalledTimes(1);
+				
+				mockDisk = mockDisk.mock.invocationCallOrder[0];
+				mockCreate = mockCreate.mock.invocationCallOrder[0];
+				expect(mockDisk).toBeLessThan(mockCreate);
+
+				// expect(mockDisk).toHaveBeenCalledBefore(mockCreate);
+				// estudar usar cenários com mock function
+			});
+			
+		});
+		/**
+		 * Bloco de testes para a action getBase64 do Serviço DRIVE
+		 */
+	});
+});
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:19-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

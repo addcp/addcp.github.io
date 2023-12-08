@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-ocr-api/src/services/test/unit/OCR.service.spec.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-ocr-api/src/services/test/unit/OCR.service.spec.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">"use strict";
+const { ServiceBroker } = require("moleculer");
+const service = require("../../OCR.service");
+const { ValidationError } = require("moleculer").Errors;
+const { AddsonServerError, AddsonClientError } = require("add-base-utils-lib/libs/customErrors");
+const Settings = require("./cenarios/Settings");
+
+
+/**
+ * Testes para os serviços contidos em &lt;strong>add-tools-ocr-api&lt;/strong>
+ * @namespace add-tools-ocr-api.Testes
+ */
+
+/**
+ * Este arquivo contém os testes para o serviço OCR
+ * @namespace add-tools-ocr-api.Testes.OCR
+ */
+
+const settings = new Settings();
+const cenarios = settings.getSettings();
+
+/**
+ * Bloco de testes do Serviço OCR
+ */
+describe("Testando serviço 'OCR'", () => {
+	const broker = new ServiceBroker({ logger: false });
+	broker.createService(service);
+	beforeAll(() => broker.start(), 180000);
+	afterAll(() => broker.stop());
+
+	/**
+	 * @desc Teste para verificar se a descrição do serviço está preenchida. &lt;/br>
+	 * O serviço OCR deve ter uma descrição breve em sua metadata, que aceita qualquer valor do tipo string.
+	 * @summary Descrição do serviço
+	 * @test Descrição_Serviço
+	 * @memberof add-tools-ocr-api.Testes.OCR#
+	 */
+	test("Deveria ter uma descrição breve em cada serviço com qualquer valor do tipo String", () => {
+		expect(service?.metadata?.$description).toEqual(expect.any(String));
+	});
+
+	/**
+	 * @desc Teste para verificar se nas configurações do serviço OCR existe um código IDAPP. &lt;/br>
+	 * O serviço OCR deve ter um código IDAPP nas suas configurações definido.
+	 * @summary IDAPP do Serviço
+	 * @test IDAPP_Serviço
+	 * @memberof add-tools-ocr-api.Testes.OCR#
+	 */
+	test("Deveria ter um código IDAPP nas configurações de cada serviço", function () {
+		expect(service?.settings?.IDAPP).toBeDefined();
+	});
+
+	/**
+	 * Bloco de testes das actions do Serviço OCR
+	 */
+	describe("Testando ação 'img'", () => {
+
+		/**
+		 * @desc Teste para verificar se a descrição da action img está preenchida. &lt;/br>
+		 * A action img do serviço OCR deve ter uma descrição breve, que aceita qualquer valor do tipo string.
+		 * @summary Descrição da action img
+		 * @test Descrição_Action
+		 * @memberof add-tools-ocr-api.Testes.OCR#
+		 */
+		test("Deveria ter uma descrição breve em cada ação", function () {
+			expect(service?.actions?.["img"].description).toEqual(
+				expect.any(String)
+			);
+		});
+
+		/**
+		 * Bloco de testes dos parâmetros da action img do Serviço OCR 
+		 */
+		describe('Testando validação de parâmetros', () => {
+			/**
+			 * @desc Teste para verificar a validação de parâmetro opcional para base64 da action img do Serviço OCR. &lt;/br>
+			 * O parâmetro base64 da action img do serviço OCR deve ser opcional.
+			 * @summary Validação de parâmetro opcional 
+			 * @test Base64_Opcional
+			 * @memberof add-tools-ocr-api.Testes.OCR#
+			 */	
+			test("Deveria tratar o parâmetro base64 como opcional", () => {
+				expect(service?.actions?.["img"]?.params?.base64?.optional).toEqual(true);
+
+			});
+
+			/**
+			 * @desc Teste para verificar a exceção AddsonClientError ao enviar parâmetro input em branco. &lt;/br>
+			 * Quando o parâmetro base64 da actiom img estiver em branco o parâmetro input da action img deve estar preenchido.
+			 * @summary Validação de parâmetro input
+			 * @test Input_Preenchido
+			 * @memberof add-tools-ocr-api.Testes.OCR#
+			 */	
+			test("Deveria lançar uma exceção do tipo AddsonClientError se o parâmetro base64 e o input estiverem em branco", async () => {
+				let resultado = null;
+
+				try {
+					resultado = await broker.call("OCR.img");
+				} catch (error) {
+					resultado = error;
+				}
+				expect(resultado).toBeInstanceOf(AddsonClientError);
+			});
+		});
+
+		/**
+		 * @desc Teste para verificar exceção de validação ao enviar parâmetros inválidos. &lt;/br>
+		 * A action img do serviço OCR deve lançar uma exceção de validação quando enviado o parâmetro base64 inválido.
+		 * @summary Parâmetro base64 inválido
+		 * @test Parâmetro_Inválido
+		 * @memberof add-tools-ocr-api.Testes.OCR#
+		 */
+		test("Deveria lançar uma exceção de validação quando o base64 for inválido", async function () {
+			let resultado = null;
+
+			try {
+				resultado = await broker.call("OCR.img", {
+					base64: "em9uaQ=",
+				});
+			} catch (error) {
+				resultado = error;
+			}
+			expect(resultado).toBeInstanceOf(ValidationError);
+		});
+
+		/**
+		 * @desc Teste para verificar exceção ao enviar um base64 que não é uma imagem. &lt;/br>
+		 * A action img do serviço OCR deve lançar uma exceção ao enviar um base64 que não é uma imagem.
+		 * @summary Imagem inválida
+		 * @test Imagem_Inválida
+		 * @memberof add-tools-ocr-api.Testes.OCR#
+		 */
+		test("Deveria lançar uma exceção, pois o base64 não é uma imagem", async function () {
+			let resultado = null;
+			try {
+				await broker.call("OCR.img", {
+					base64: "em9uaQ==",
+				});
+			} catch (error) {
+				resultado = error;
+			}
+			expect(resultado).toBeInstanceOf(AddsonServerError);
+		});
+
+
+		for (const cenario in cenarios) {
+			const fields = cenarios[cenario].fields;
+			let resultado = null;
+			
+			/**
+			 * Bloco de testes para os cenários do Serviço OCR
+			 */
+			describe(`Testando cenário: ${cenarios[cenario]?.name}`, () => {
+				beforeAll(async () => {
+					// jest.setTimeout(180 * 1000);
+					resultado = await broker.call("OCR.img", {
+						input: cenarios[cenario].input,
+						base64: cenarios[cenario].base64,
+						resize: cenarios[cenario].resize,
+						config: {
+							template: cenarios[cenario].template,
+						},
+					});
+				}, 180000);
+
+				for (const field in fields) {
+
+					
+					if (fields[field].optional) {
+						/**
+						 * @desc Teste deve ser pulado quando o campo for opcional. &lt;/br>
+						 * Aqui sempre que o campo estiver marcado com 'opcional true', o teste deve ser pulado.
+						 * @summary Campos opcionais
+						 * @todo @function Campos_Opcionais_Serviço
+						 * @memberof add-tools-ocr-api.Testes.OCR#
+						 */
+						test.todo(
+							`Deveria retornar ${fields[field].value} para o campo ${fields[field].name}`
+							// async function () {
+							// 	// const resultado = await broker.call("OCR.img", {
+							// 	// 	base64: cenarios[cenario].base64,
+							// 	// });
+							// 	expect(resultado.result).toMatch(
+							// 		fields[field].value
+							// 	);
+							// }
+						);
+					} else {
+						/**
+						 * @desc Teste para verificar o valor dos campos de acordo com o nome dos campos. &lt;/br>
+						 * Aqui o teste deve ser executado quando o campo não for opcional.
+						 * Este teste verifica cada campo que não está marcado como opcional e confirma se o valor do campo retornado está de acordo com o cenário.
+						 * @summary Valores dos campos
+						 * @test Campos_Serviço
+						 * @memberof add-tools-ocr-api.Testes.OCR#
+						 */
+						test(`Deveria retornar ${fields[field].value} para o campo ${fields[field].name}`, async function () {
+							expect(resultado.result).toMatch(
+								fields[field].value
+							);
+						});
+					}
+				}
+			});
+		}
+	});
+});
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:19-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>

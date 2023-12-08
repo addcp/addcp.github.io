@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>Addson Source: add-tools-vault-api/src/services/vaultsignature.service.js</title>
+
+	<!--[if lt IE 9]>
+	<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+	<link type="text/css" rel="stylesheet" href="styles/sunlight.default.css">
+
+	<link type="text/css" rel="stylesheet" href="styles/site.cerulean.css">
+
+</head>
+
+<body>
+
+<div class="navbar navbar-default navbar-fixed-top navbar-inverse">
+<div class="container">
+	<div class="navbar-header">
+		<a class="navbar-brand" href="index.html">Addson</a>
+		<button class="navbar-toggle" type="button" data-toggle="collapse" data-target="#topNavigation">
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+        </button>
+	</div>
+	<div class="navbar-collapse collapse" id="topNavigation">
+		<ul class="nav navbar-nav">
+			
+			<li class="dropdown">
+				<a href="namespaces.list.html" class="dropdown-toggle" data-toggle="dropdown">Namespaces<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="add-tools-browser-api.html">add-tools-browser-api</a></li><li><a href="add-tools-drive-api.html">add-tools-drive-api</a></li><li><a href="add-tools-http-api.html">add-tools-http-api</a></li><li><a href="add-tools-mail-api.html">add-tools-mail-api</a></li><li><a href="add-tools-ocr-api.html">add-tools-ocr-api</a></li><li><a href="add-tools-platform-api.html">add-tools-platform-api</a></li><li><a href="add-tools-vault-api.html">add-tools-vault-api</a></li>
+				</ul>
+			</li>
+			
+			<li class="dropdown">
+				<a href="classes.list.html" class="dropdown-toggle" data-toggle="dropdown">Classes<b class="caret"></b></a>
+				<ul class="dropdown-menu ">
+					<li><a href="Settings.html">Settings</a></li>
+				</ul>
+			</li>
+			
+		</ul>
+        
+            <div class="col-sm-3 col-md-3">
+                <form class="navbar-form" role="search">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" name="q" id="search-input">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" id="search-submit"><i class="glyphicon glyphicon-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        
+	</div>
+
+</div>
+</div>
+
+
+<div class="container" id="toc-content">
+<div class="row">
+
+	
+	<div class="col-md-12">
+	
+		<div id="main">
+			
+
+		<h1 class="page-title">Source: add-tools-vault-api/src/services/vaultsignature.service.js</h1>
+    
+<section>
+    <article>
+        <pre
+            class="sunlight-highlight-javascript linenums">const path = require("path");
+const vaultErrorMessage = require("classes/resources/vaultErrorMessage");
+const utilslib = require("add-base-utils-lib/libs/utils");
+
+/**
+ * @desc O Serviço de vaultsignature faz ...
+ * @namespace add-tools-vault-api.vaultsignature
+ * @memberof add-tools-vault-api
+ * @property {string} name - Nome do serviço
+ * @todo @property {number} version - Versão do serviço
+ * @property {array} mixins - Mixins do serviço
+ * @property {object} metadata - Metadados do serviço
+ * @property {object} settings - Configurações do serviço
+ * @property {object} actions - Ações do serviço &lt;strong>sign&lt;/strong>
+ * @property {object} methods - Métodos do serviço &lt;code>validateInputParams()&lt;/code>, &lt;code>addEncrypt()&lt;/code>, &lt;code>addDecrypt()&lt;/code>, &lt;code>encodeBase64()&lt;/code>, &lt;code>decodeBase64()&lt;/code>
+ */
+module.exports = {
+	name: "vaultsignature",
+	// version: 1,
+	mixins: [],
+	metadata: { $description: "Vault Signature client API" },
+	settings: {
+		IDAPP: `${path.dirname(__filename).split(path.sep).pop()}`,
+		rest: true,
+		MONETIZATION: false,
+	},
+	/**
+	 * @summary Actions do serviço
+	 * @property {object} sign - Action sign {@link add-tools-vault-api.vaultsignature#sign action sign}
+	 * @memberof add-tools-vault-api.vaultsignature#
+	 */
+	actions: {
+		/**
+		 * @desc A ação sign faz ...
+		 * @summary Ação sign
+		 * @action sign
+		 * @property {string} description - Descrição da action
+		 * @todo @property {string} rest - Rota da action
+		 * @property {object} params - Parâmetros da action
+		 * @property {string} params.secretAlias - Alias do certificado
+		 * @property {string} params.messageContent - Conteúdo da mensagem
+		 * @property {string} [params.messageContentFormat] - Formato do conteúdo da mensagem
+		 * @property {string} params.signatureModel - Modelo de assinatura
+		 * @property {string} [params.tag] - Tag
+		 * @property {string} [params.uri] - URI
+		 * @property {boolean} [params.emptyUri] - URI vazia
+		 * @property {array} [params.transforms] - Transformações
+		 * @property {string} [params.canonicalizationAlgorithm] - Algoritmo de canonicalização
+		 * @property {string} [params.location] - Localização
+		 * @property {string} [params.locationTag] - Tag de localização
+		 * @property {array} permissions - Permissões da action
+		 * @memberof add-tools-vault-api.vaultsignature#
+		 */
+		sign: {
+			description: "Sign Message",
+			// rest: "POST /sign",
+			params: {
+				secretAlias: {
+					type: "string",
+				},
+				messageContent: {
+					type: "string",
+				},
+				messageContentFormat: {
+					type: "string", // raw, escaped, base64 - default é base64
+					optional: true,
+				},
+				signatureModel: {
+					type: "string", // nfe, nfse, satmx, etc
+				},
+				tag: {
+					type: "string", // infevento
+					optional: true,
+				},
+				uri: {
+					type: "string",
+					optional: true,
+				},
+				emptyUri: {
+					type: "boolean",
+					optional: true,
+				},
+				transforms: {
+					type: "array",
+					optional: true,
+				},
+				canonicalizationAlgorithm: {
+					type: "string",
+					optional: true,
+				},
+				location: {
+					type: "string", // append (default), prepend, before (using locationTag), after (using locationTag)
+					optional: true,
+				},
+				locationTag: {
+					type: "string",
+					optional: true,
+				},
+			},
+			permissions: ["add-tools-vault-api", "ORG"],
+			async handler(ctx) {
+				if (!ctx.params.secretAlias) ctx.params.secretAlias = "-";
+				const certificateObj = await ctx.call("vault.retrieveSecret", {
+					secretType: "",
+					secretAlias: ctx.params.secretAlias,
+					addDecrypt: "X",
+				});
+
+				if (
+					certificateObj &amp;&amp;
+					certificateObj?.data?.pbKey &amp;&amp;
+					certificateObj?.data?.pvKey
+				) {
+					const privateKeyFile = this.decodeBase64(
+						certificateObj.data.pvKey,
+					);
+					const publicKeyFile = this.decodeBase64(
+						certificateObj.data.pbKey,
+					);
+					const signatureImpl =
+						require("classes/resources/SignatureObjectFactory").signatureObjectFactory(
+							ctx.params,
+							ctx.params?.signatureModel,
+						);
+					const signatureResponse = await signatureImpl.sign(
+						ctx.params,
+						privateKeyFile,
+						publicKeyFile,
+					);
+					return signatureResponse;
+				}
+				return {
+					context: null,
+					statusInfo: {
+						status: false,
+						errorCode: 503,
+						message:
+							"Nao foi possivel obter certificado apto para assinatura",
+						solution: "Revisar os parametros",
+						trace: null,
+					},
+				};
+			},
+			openapi: {
+				responses: {
+					200: {
+						description: "Secret obtido com sucesso",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										context: {
+											type: "string",
+											example:
+												"conteudo da resposta em base64",
+										},
+										statusInfo: {
+											type: "object",
+											properties: {
+												status: {
+													type: "boolean",
+													example: "true",
+												},
+												errorCode: {
+													type: "string",
+													example: "200",
+												},
+												message: {
+													type: "string",
+													example:
+														"Nao foi possivel obter certificado apto para assinatura",
+												},
+												solution: {
+													type: "string",
+													example:
+														"Revisar os parametros",
+												},
+												trace: {
+													type: "string",
+													example: "null",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+	methods: {
+		/**
+		 * @desc O method &lt;code>validateInputParams()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method validateInputParams
+		 * @param {object} params - Parâmetros da action
+		 * @param {object} nodeID - ID do nó
+		 * @returns {undefined} - Se passou por todas validacoes retorna 'undefined'
+		 * @memberof add-tools-vault-api.vaultsignature#
+		 */
+		validateInputParams(params, nodeID) {
+			const regex = /^[A-Za-z0-9]+$/;
+			let isValid = false;
+
+			isValid = params?.secretAlias
+				? regex.test(params.secretAlias)
+				: true;
+			if (!isValid) {
+				var errorResponse = vaultErrorMessage.getErrorMessageObj(
+					"ValidationError",
+					"Parameters validation error!",
+					422,
+					"VALIDATION_ERROR",
+					null,
+					vaultErrorMessage.getErrorMessageDataObj(
+						"required",
+						"Caracter Invalido nos parametros de entrada",
+						"secretAlias",
+						nodeID,
+						"vault",
+					),
+				);
+				return errorResponse;
+			}
+
+			isValid = params?.newSecretAlias
+				? regex.test(params.newSecretAlias)
+				: true;
+			if (!isValid) {
+				var errorResponse = vaultErrorMessage.getErrorMessageObj(
+					"ValidationError",
+					"Parameters validation error!",
+					422,
+					"VALIDATION_ERROR",
+					null,
+					vaultErrorMessage.getErrorMessageDataObj(
+						"required",
+						"Caracter Invalido nos parametros de entrada",
+						"newSecretAlias",
+						nodeID,
+						"vault",
+					),
+				);
+				return errorResponse;
+			}
+
+			isValid = params?.secretType ? regex.test(params.secretType) : true;
+			if (!isValid) {
+				var errorResponse = vaultErrorMessage.getErrorMessageObj(
+					"ValidationError",
+					"Parameters validation error!",
+					422,
+					"VALIDATION_ERROR",
+					null,
+					vaultErrorMessage.getErrorMessageDataObj(
+						"required",
+						"Caracter Invalido nos parametros de entrada",
+						"secretType",
+						nodeID,
+						"vault",
+					),
+				);
+				return errorResponse;
+			}
+
+			isValid = params?.companyCode
+				? regex.test(params.companyCode)
+				: true;
+			if (!isValid) {
+				var errorResponse = vaultErrorMessage.getErrorMessageObj(
+					"ValidationError",
+					"Parameters validation error!",
+					422,
+					"VALIDATION_ERROR",
+					null,
+					vaultErrorMessage.getErrorMessageDataObj(
+						"required",
+						"Caracter Invalido nos parametros de entrada",
+						"companyCode",
+						nodeID,
+						"vault",
+					),
+				);
+				return errorResponse;
+			}
+
+			// Se passou por todas validacoes retorna 'undefined'
+		},
+		/**
+		 * @desc O method &lt;code>addEncrypt()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method addEncrypt
+		 * @param {string} e - Parâmetros da action
+		 * @memberof add-tools-vault-api.vaultsignature#
+		 */
+		addEncrypt(e) {
+			try {
+				for (
+					var r = "",
+						t =
+							"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+						s = t.length,
+						c = 0;
+					c &lt; 15;
+					c++
+				)
+					r += t.charAt(Math.floor(Math.random() * s));
+				return (
+					(e = this.encodeBase64(e)),
+					(e = e.replace("=", ".")),
+					(e = `${e.substring(0, 2)}W${r.substring(
+						0,
+						2,
+					)}add${e.substring(2, e.length)}${r.substring(
+						2,
+						r.length,
+					)}`),
+					e
+				);
+			} catch (err) {
+				return "ERRO: Falha ao encriptar secret";
+			}
+		},
+		/**
+		 * @desc O method &lt;code>addDecrypt()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method addDecrypt
+		 * @param {string} r - Parâmetros da action
+		 * @returns {string} - Retorna o secret descriptografado
+		 * @memberof add-tools-vault-api.vaultsignature#
+		 */
+		addDecrypt(r) {
+			try {
+				if (!r || r.length &lt; 10) return "ERRO: secret invalido";
+				if (r.length == 19) return "";
+			} catch (err) {
+				return "ERRO: Falha ao avaliar o secret";
+			}
+			try {
+				let e = r.substring(0, 2) + r.substring(8, r.length - 13);
+				return (e = e.replace(".", "=")), (e = this.decodeBase64(e));
+			} catch (r) {
+				return "ERRO: Falha ao realizar o decrypt do secret informado";
+			}
+		},
+		/**
+		 * @desc O method &lt;code>encodeBase64()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method encodeBase64
+		 * @param {string} str - Parâmetros da action
+		 * @returns {string} - Retorna o secret criptografado em base64
+		 * @memberof add-tools-vault-api.vaultsignature#
+		 */
+		encodeBase64(str) {
+			return Buffer.from(str).toString("base64");
+		},
+		/**
+		 * @desc O method &lt;code>decodeBase64()&lt;/code> ...
+		 * @summary Método para ...
+		 * @method decodeBase64
+		 * @param {string} str - Parâmetros da action
+		 * @returns {string} - Retorna o secret descriptografado em utf-8
+		 * @memberof add-tools-vault-api.vaultsignature#
+		 */
+		decodeBase64(str) {
+			return Buffer.from(str, "base64").toString("utf-8");
+		},
+	},
+};
+</pre>
+    </article>
+</section>
+
+
+
+
+
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+
+	
+
+</div>
+</div>
+
+
+    <div class="modal fade" id="searchResults">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Search results</h4>
+          </div>
+          <div class="modal-body"></div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div>
+
+
+<footer>
+
+
+	<span class="copyright">
+	© Addson - 2023
+	</span>
+
+<span class="jsdoc-message">
+	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a>
+	
+		on 2023-12-08T17:37:19-03:00
+	
+	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
+</span>
+</footer>
+
+<script src="scripts/docstrap.lib.js"></script>
+<script src="scripts/toc.js"></script>
+
+    <script type="text/javascript" src="scripts/fulltext-search-ui.js"></script>
+
+
+<script>
+$( function () {
+	$( "[id*='$']" ).each( function () {
+		var $this = $( this );
+
+		$this.attr( "id", $this.attr( "id" ).replace( "$", "__" ) );
+	} );
+
+	$( ".tutorial-section pre, .readme-section pre, pre.prettyprint.source" ).each( function () {
+		var $this = $( this );
+
+		var example = $this.find( "code" );
+		exampleText = example.html();
+		var lang = /{@lang (.*?)}/.exec( exampleText );
+		if ( lang && lang[1] ) {
+			exampleText = exampleText.replace( lang[0], "" );
+			example.html( exampleText );
+			lang = lang[1];
+		} else {
+			var langClassMatch = example.parent()[0].className.match(/lang\-(\S+)/);
+			lang = langClassMatch ? langClassMatch[1] : "javascript";
+		}
+
+		if ( lang ) {
+
+			$this
+			.addClass( "sunlight-highlight-" + lang )
+			.addClass( "linenums" )
+			.html( example.html() );
+
+		}
+	} );
+
+	Sunlight.highlightAll( {
+		lineNumbers : true,
+		showMenu : true,
+		enableDoclinks : true
+	} );
+
+	$.catchAnchorLinks( {
+        navbarOffset: 10
+	} );
+	$( "#toc" ).toc( {
+		anchorName  : function ( i, heading, prefix ) {
+			return $( heading ).attr( "id" ) || ( prefix + i );
+		},
+		selectors   : "#toc-content h1,#toc-content h2,#toc-content h3,#toc-content h4",
+		showAndHide : false,
+		smoothScrolling: true
+	} );
+
+	$( "#main span[id^='toc']" ).addClass( "toc-shim" );
+	$( '.dropdown-toggle' ).dropdown();
+
+    $( "table" ).each( function () {
+      var $this = $( this );
+      $this.addClass('table');
+    } );
+
+} );
+</script>
+
+
+
+<!--Navigation and Symbol Display-->
+
+
+<!--Google Analytics-->
+
+
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            SearcherDisplay.init();
+        });
+    </script>
+
+
+</body>
+</html>
