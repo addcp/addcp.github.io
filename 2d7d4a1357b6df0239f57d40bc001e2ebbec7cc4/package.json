@@ -1,0 +1,36 @@
+{
+  "name": "apitest",
+  "version": "1.0.0",
+  "description": "Testes Integrados",
+  "main": "./src/index.js",
+  "scripts": {
+    "cenario": "node test/modulos/gerarCenario.js",
+    "test": "jest --color --noStackTrace",
+    "test:geral": "jest --noStackTrace --testPathPattern='cenarios/.*/geral/.*.spec.js'",
+    "test:braskem": "jest --noStackTrace --testPathPattern='cenarios/.*/braskem/.*.spec.js'",
+    "test:json": "jest --noStackTrace --json --testPathPattern='cenarios/.*/geral/.*.spec.js' --outputFile=reports/json/report\"$(date \"+%Y-%m-%d_%H-%M-%S\")\".json",
+    "test:report": "cross-env QASE_REPORT=true jest",
+    "test:watch": "jest --watchAll",
+    "teste:coverage": "jest --coverage",
+    "doc": "jsdoc -r src -d docs",
+    "docTeste": "jsdoc -r test -d docsTeste"
+  },
+  "keywords": [],
+  "author": "Kelvya Mendonça",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "eslint": "^8.52.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jest": "^27.4.3",
+    "jest": "^29.7.0",
+    "jest-html-reporters": "^3.1.7",
+    "jest-qase-reporter": "^1.3.1",
+    "jsdoc": "^4.0.2"
+  },
+  "dependencies": {
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5"
+  }
+}
